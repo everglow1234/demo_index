@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Equiverse Index: Worked Example</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        h1 { color: #1a73e8; border-bottom: 3px solid #1a73e8; padding-bottom: 10px; }
+        h2 { color: #1a73e8; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-top: 30px; }
+        h3 { color: #333; }
+        table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #1a73e8; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .formula-box { background-color: #e8f0fe; border: 2px solid #1a73e8; padding: 15px; margin: 15px 0; border-radius: 5px; font-family: monospace; }
+        .highlight { background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 15px 0; }
+        .success { background-color: #d4edda; padding: 10px; border-left: 4px solid #28a745; margin: 15px 0; }
+        .warning { background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 15px 0; }
+        .danger { background-color: #f8d7da; padding: 10px; border-left: 4px solid #dc3545; margin: 15px 0; }
+        .scorecard { background-color: #f8f9fa; border: 2px solid #1a73e8; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .score-large { font-size: 36px; font-weight: bold; color: #1a73e8; }
+        code { background-color: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+        .pyramid { font-family: monospace; background-color: #f8f9fa; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<h1>EQUIVERSE INDEX: WORKED EXAMPLE WITH SAMPLE DATA</h1>
+
+<p><strong>Purpose:</strong> Step-by-step calculation of Equiverse Score for a sample company<br>
+
+
+<hr>
+
+<h2>EXAMPLE COMPANY: TechCorp India Ltd (IT Sector)</h2>
+
+<hr>
+
+<h2>STEP 1: RAW DATA FROM BRSR REPORT</h2>
+
+<h3>Employee Distribution by Tier and Gender</h3>
+
+<table>
+    <tr>
+        <th>Tier</th>
+        <th>Total (T)</th>
+        <th>Female (F)</th>
+        <th>Male (M)</th>
+    </tr>
+    <tr>
+        <td>Tier 1: Entry Level</td>
+        <td>5,000</td>
+        <td>2,000</td>
+        <td>3,000</td>
+    </tr>
+    <tr>
+        <td>Tier 2: Junior Management</td>
+        <td>2,000</td>
+        <td>700</td>
+        <td>1,300</td>
+    </tr>
+    <tr>
+        <td>Tier 3: Middle Management</td>
+        <td>800</td>
+        <td>200</td>
+        <td>600</td>
+    </tr>
+    <tr>
+        <td>Tier 4: Senior Management</td>
+        <td>200</td>
+        <td>40</td>
+        <td>160</td>
+    </tr>
+    <tr>
+        <td>Tier 5: C-Suite/Board</td>
+        <td>20</td>
+        <td>3</td>
+        <td>17</td>
+    </tr>
+    <tr style="font-weight: bold; background-color: #e8f0fe;">
+        <td>TOTAL</td>
+        <td>8,020</td>
+        <td>2,943</td>
+        <td>5,077</td>
+    </tr>
+</table>
+
+<h3>Additional BRSR Data</h3>
+<ul>
+    <li>Female turnover last year: <strong>320 employees</strong></li>
+    <li>Total females (start of year): <strong>3,100</strong></li>
+    <li>Employees who took parental leave: <strong>150</strong></li>
+    <li>Employees who returned from parental leave: <strong>120</strong></li>
+</ul>
+
+<hr>
+
+<h2>STEP 2: CALCULATE PRIMARY VARIABLES</h2>
+
+<h3>Variables V1-V5: Female Ratio at Each Tier</h3>
+
+<table>
+    <tr>
+        <th>Variable</th>
+        <th>Formula</th>
+        <th>Calculation</th>
+        <th>Result</th>
+    </tr>
+    <tr>
+        <td>R1 (Entry)</td>
+        <td>F1 / T1</td>
+        <td>2,000 / 5,000</td>
+        <td><strong>0.400 (40.0%)</strong></td>
+    </tr>
+    <tr>
+        <td>R2 (Junior)</td>
+        <td>F2 / T2</td>
+        <td>700 / 2,000</td>
+        <td><strong>0.350 (35.0%)</strong></td>
+    </tr>
+    <tr>
+        <td>R3 (Middle)</td>
+        <td>F3 / T3</td>
+        <td>200 / 800</td>
+        <td><strong>0.250 (25.0%)</strong></td>
+    </tr>
+    <tr>
+        <td>R4 (Senior)</td>
+        <td>F4 / T4</td>
+        <td>40 / 200</td>
+        <td><strong>0.200 (20.0%)</strong></td>
+    </tr>
+    <tr>
+        <td>R5 (C-Suite)</td>
+        <td>F5 / T5</td>
+        <td>3 / 20</td>
+        <td><strong>0.150 (15.0%)</strong></td>
+    </tr>
+</table>
+
+<h3>Variable V6: Pipeline Flow Ratio (PFR)</h3>
+<div class="formula-box">
+    PFR = R5 / R1 = 0.150 / 0.400 = <strong>0.375</strong>
+</div>
+<div class="warning">
+    <strong>Interpretation:</strong> Only 37.5% of entry-level female representation flows through to C-Suite. Significant leakage!
+</div>
+
+<h3>Variable V7: Female Retention Rate (RET_F)</h3>
+<div class="formula-box">
+    RET_F = 1 - (Female Turnover / Total Females at Start)<br>
+    RET_F = 1 - (320 / 3,100) = 1 - 0.103 = <strong>0.897 (89.7%)</strong>
+</div>
+
+<h3>Variable V8: Parental Leave Return Rate (PLR)</h3>
+<div class="formula-box">
+    PLR = Returned / Took Leave = 120 / 150 = <strong>0.800 (80.0%)</strong>
+</div>
+
+<hr>
+
+<h2>STEP 3: CALCULATE DERIVED VARIABLES</h2>
+
+<h3>D1: Drop-off Rate (Entry → Middle)</h3>
+<div class="formula-box">
+    PDR_1-3 = (R1 - R3) / R1 = (0.400 - 0.250) / 0.400 = <strong>0.375 (37.5% drop)</strong>
+</div>
+
+<h3>D2: Drop-off Rate (Middle → C-Suite)</h3>
+<div class="formula-box">
+    PDR_3-5 = (R3 - R5) / R3 = (0.250 - 0.150) / 0.250 = <strong>0.400 (40.0% drop)</strong>
+</div>
+
+<h3>Bottleneck Identification</h3>
+
+<table>
+    <tr>
+        <th>Transition</th>
+        <th>Drop-off Rate</th>
+        <th>Status</th>
+    </tr>
+    <tr>
+        <td>Entry → Junior</td>
+        <td>12.5%</td>
+        <td>Normal</td>
+    </tr>
+    <tr style="background-color: #f8d7da;">
+        <td>Junior → Middle</td>
+        <td>28.6%</td>
+        <td>🚨 <strong>"Broken Rung"</strong></td>
+    </tr>
+    <tr>
+        <td>Middle → Senior</td>
+        <td>20.0%</td>
+        <td>High</td>
+    </tr>
+    <tr>
+        <td>Senior → C-Suite</td>
+        <td>25.0%</td>
+        <td>High</td>
+    </tr>
+</table>
+
+<div class="danger">
+    <strong>BOTTLENECK TIER = Junior → Middle Management (28.6% drop)</strong>
+</div>
+
+<hr>
+
+<h2>STEP 4: CALCULATE DIMENSION SCORES</h2>
+
+<h3>A. Representation Score (S_Rep)</h3>
+
+<p><strong>Formula:</strong> S_Rep = Σ(wi × Ri)</p>
+
+<table>
+    <tr>
+        <th>Tier</th>
+        <th>Weight (wi)</th>
+        <th>Ratio (Ri)</th>
+        <th>wi × Ri</th>
+    </tr>
+    <tr>
+        <td>Entry (w1)</td>
+        <td>0.05</td>
+        <td>0.400</td>
+        <td>0.020</td>
+    </tr>
+    <tr>
+        <td>Junior (w2)</td>
+        <td>0.10</td>
+        <td>0.350</td>
+        <td>0.035</td>
+    </tr>
+    <tr>
+        <td>Middle (w3)</td>
+        <td>0.15</td>
+        <td>0.250</td>
+        <td>0.0375</td>
+    </tr>
+    <tr>
+        <td>Senior (w4)</td>
+        <td>0.20</td>
+        <td>0.200</td>
+        <td>0.040</td>
+    </tr>
+    <tr>
+        <td>C-Suite (w5)</td>
+        <td>0.50</td>
+        <td>0.150</td>
+        <td>0.075</td>
+    </tr>
+    <tr style="font-weight: bold; background-color: #e8f0fe;">
+        <td colspan="3">S_Rep =</td>
+        <td>0.2075</td>
+    </tr>
+</table>
+
+<div class="formula-box">
+    Normalized: S_Rep = 0.2075 / 0.50 = <strong>0.415 (41.5%)</strong>
+</div>
+
+<h3>B. Progression Score (S_Prog)</h3>
+
+<div class="formula-box">
+    S_Prog = 0.50 × PFR + 0.25 × (1 - PDR_1-3) + 0.25 × (1 - PDR_3-5)<br><br>
+    S_Prog = 0.50 × 0.375 + 0.25 × (1 - 0.375) + 0.25 × (1 - 0.400)<br>
+    S_Prog = 0.1875 + 0.15625 + 0.150<br>
+    S_Prog = <strong>0.494 (49.4%)</strong>
+</div>
+
+<h3>C. Retention Score (S_Ret)</h3>
+
+<div class="formula-box">
+    S_Ret = 0.60 × RET_F + 0.40 × PLR<br><br>
+    S_Ret = 0.60 × 0.897 + 0.40 × 0.800<br>
+    S_Ret = 0.5382 + 0.320<br>
+    S_Ret = <strong>0.858 (85.8%)</strong>
+</div>
+
+<hr>
+
+<h2>STEP 5: CALCULATE FINAL EQUIVERSE SCORE</h2>
+
+<div class="formula-box" style="text-align: center; font-size: 18px;">
+    <strong>EQUIVERSE SCORE = 0.50 × S_Rep + 0.30 × S_Prog + 0.20 × S_Ret</strong>
+</div>
+
+<table>
+    <tr>
+        <th>Dimension</th>
+        <th>Score</th>
+        <th>Weight</th>
+        <th>Contribution</th>
+    </tr>
+    <tr>
+        <td>Representation</td>
+        <td>0.415</td>
+        <td>0.50</td>
+        <td>0.2075</td>
+    </tr>
+    <tr>
+        <td>Progression</td>
+        <td>0.494</td>
+        <td>0.30</td>
+        <td>0.1482</td>
+    </tr>
+    <tr>
+        <td>Retention</td>
+        <td>0.858</td>
+        <td>0.20</td>
+        <td>0.1716</td>
+    </tr>
+    <tr style="font-weight: bold; background-color: #e8f0fe;">
+        <td colspan="3">EQUIVERSE SCORE =</td>
+        <td>0.5273</td>
+    </tr>
+</table>
+
+<div class="scorecard" style="text-align: center;">
+    <p style="margin: 0;">FINAL EQUIVERSE SCORE</p>
+    <p class="score-large">52.73 / 100</p>
+    <p style="margin: 0; font-size: 18px;">Rating: <strong>AVERAGE</strong></p>
+</div>
+
+<hr>
+
+<h2>STEP 6: INTERPRETATION & BENCHMARKING</h2>
+
+<h3>Score Interpretation</h3>
+
+<table>
+    <tr>
+        <th>Score Range</th>
+        <th>Rating</th>
+        <th>Meaning</th>
+    </tr>
+    <tr style="background-color: #d4edda;">
+        <td>80-100</td>
+        <td>Excellent</td>
+        <td>Industry leader in gender equity</td>
+    </tr>
+    <tr style="background-color: #d1ecf1;">
+        <td>60-79</td>
+        <td>Good</td>
+        <td>Above average, some gaps remain</td>
+    </tr>
+    <tr style="background-color: #fff3cd;">
+        <td>40-59</td>
+        <td>Average</td>
+        <td>Significant room for improvement</td>
+    </tr>
+    <tr style="background-color: #f8d7da;">
+        <td>20-39</td>
+        <td>Poor</td>
+        <td>Major systemic barriers exist</td>
+    </tr>
+    <tr style="background-color: #dc3545; color: white;">
+        <td>0-19</td>
+        <td>Critical</td>
+        <td>Urgent intervention needed</td>
+    </tr>
+</table>
+
+<div class="warning">
+    <strong>TechCorp India Score: 52.73 → AVERAGE</strong><br>
+    "Company has foundational representation but significant pipeline leakage"
+</div>
+
+<h3>Component Breakdown</h3>
+
+<table>
+    <tr>
+        <th>Component</th>
+        <th>Score</th>
+        <th>Weight</th>
+        <th>Contribution</th>
+        <th>Assessment</th>
+    </tr>
+    <tr>
+        <td>Representation</td>
+        <td>41.5%</td>
+        <td>50%</td>
+        <td>20.75 pts</td>
+        <td>⚠️ Weak (C-Suite gap)</td>
+    </tr>
+    <tr>
+        <td>Progression</td>
+        <td>49.4%</td>
+        <td>30%</td>
+        <td>14.82 pts</td>
+        <td>⚠️ Moderate (pipeline issues)</td>
+    </tr>
+    <tr>
+        <td>Retention</td>
+        <td>85.8%</td>
+        <td>20%</td>
+        <td>17.16 pts</td>
+        <td>✅ Strong</td>
+    </tr>
+</table>
+
+<div class="success">
+    <strong>KEY INSIGHT:</strong> Retention is strong, but poor progression is the bottleneck!
+</div>
+
+<h3>Tier-by-Tier Analysis</h3>
+
+<table>
+    <tr>
+        <th>Tier</th>
+        <th>Female %</th>
+        <th>Gap from 50%</th>
+        <th>Status</th>
+    </tr>
+    <tr>
+        <td>Entry</td>
+        <td>40.0%</td>
+        <td>-10.0%</td>
+        <td>Near Parity</td>
+    </tr>
+    <tr>
+        <td>Junior</td>
+        <td>35.0%</td>
+        <td>-15.0%</td>
+        <td>Moderate Gap</td>
+    </tr>
+    <tr style="background-color: #fff3cd;">
+        <td>Middle</td>
+        <td>25.0%</td>
+        <td>-25.0%</td>
+        <td>⚠️ Significant Gap</td>
+    </tr>
+    <tr style="background-color: #f8d7da;">
+        <td>Senior</td>
+        <td>20.0%</td>
+        <td>-30.0%</td>
+        <td>⚠️ Large Gap</td>
+    </tr>
+    <tr style="background-color: #dc3545; color: white;">
+        <td>C-Suite</td>
+        <td>15.0%</td>
+        <td>-35.0%</td>
+        <td>🚨 Critical Gap</td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>STEP 7: VISUAL REPRESENTATION - EQUIVERSE PYRAMID</h2>
+
+<h3>Gap Visualization</h3>
+
+<table>
+    <tr>
+        <th>Tier</th>
+        <th>Female %</th>
+        <th>Visual</th>
+    </tr>
+    <tr>
+        <td>Entry</td>
+        <td>40%</td>
+        <td><div style="background: linear-gradient(to right, #1a73e8 40%, #e0e0e0 40%); height: 20px; width: 200px;"></div></td>
+    </tr>
+    <tr>
+        <td>Junior</td>
+        <td>35%</td>
+        <td><div style="background: linear-gradient(to right, #1a73e8 35%, #e0e0e0 35%); height: 20px; width: 200px;"></div></td>
+    </tr>
+    <tr>
+        <td>Middle</td>
+        <td>25%</td>
+        <td><div style="background: linear-gradient(to right, #ffc107 25%, #e0e0e0 25%); height: 20px; width: 200px;"></div></td>
+    </tr>
+    <tr>
+        <td>Senior</td>
+        <td>20%</td>
+        <td><div style="background: linear-gradient(to right, #fd7e14 20%, #e0e0e0 20%); height: 20px; width: 200px;"></div></td>
+    </tr>
+    <tr>
+        <td>C-Suite</td>
+        <td>15%</td>
+        <td><div style="background: linear-gradient(to right, #dc3545 15%, #e0e0e0 15%); height: 20px; width: 200px;"></div></td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>STEP 8: ACTIONABLE RECOMMENDATIONS</h2>
+
+<h3>Priority 1: Fix the Broken Rung (Junior → Middle)</h3>
+<div class="danger">
+    <strong>Problem:</strong> 28.6% of women drop off between Junior and Middle Management
+</div>
+<p><strong>Actions:</strong></p>
+<ul>
+    <li>Review promotion criteria for Middle Management roles</li>
+    <li>Implement sponsorship programs for high-potential women at Junior level</li>
+    <li>Audit performance review processes for gender bias</li>
+    <li>Create visible pathways and success stories</li>
+</ul>
+
+<h3>Priority 2: Accelerate Senior → C-Suite Pipeline</h3>
+<div class="danger">
+    <strong>Problem:</strong> Only 15% women at C-Suite vs 20% at Senior
+</div>
+<p><strong>Actions:</strong></p>
+<ul>
+    <li>Board diversity mandate (target 30% women)</li>
+    <li>Succession planning with gender lens</li>
+    <li>Executive coaching for senior women</li>
+    <li>External hiring of women for C-Suite roles</li>
+</ul>
+
+<h3>Priority 3: Maintain Retention Strength</h3>
+<div class="success">
+    <strong>Current:</strong> 89.7% retention rate (strong)
+</div>
+<p><strong>Actions:</strong></p>
+<ul>
+    <li>Document what's working and replicate</li>
+    <li>Monitor for any deterioration</li>
+    <li>Improve parental leave return rate from 80% to 90%+</li>
+</ul>
+
+<hr>
+
+<h2>STEP 9: YEAR-OVER-YEAR TRACKING</h2>
+
+<h3>Projecting Future Scores</h3>
+
+<table>
+    <tr>
+        <th>Scenario</th>
+        <th>Year 1</th>
+        <th>Year 2</th>
+        <th>Year 3</th>
+        <th>Years to Parity</th>
+    </tr>
+    <tr>
+        <td>A: No Change (Status Quo)</td>
+        <td>52.73</td>
+        <td>52.73</td>
+        <td>52.73</td>
+        <td>Never</td>
+    </tr>
+    <tr>
+        <td>B: Moderate (+3%/tier/year)</td>
+        <td>52.73</td>
+        <td>57.50</td>
+        <td>62.30</td>
+        <td>8-10 years</td>
+    </tr>
+    <tr style="background-color: #d4edda;">
+        <td>C: Aggressive (+5%/tier/year)</td>
+        <td>52.73</td>
+        <td>60.00</td>
+        <td>67.50</td>
+        <td>5-6 years</td>
+    </tr>
+</table>
+
+<hr>
+
+<h2>STEP 10: SECTOR BENCHMARKING</h2>
+
+<h3>IT Sector Peer Comparison</h3>
+
+<table>
+    <tr>
+        <th>Company</th>
+        <th>Equiverse Score</th>
+        <th>Rank</th>
+        <th>Rating</th>
+    </tr>
+    <tr style="background-color: #d4edda;">
+        <td>Infosys</td>
+        <td>61.2</td>
+        <td>1</td>
+        <td>Good</td>
+    </tr>
+    <tr>
+        <td>TCS</td>
+        <td>58.7</td>
+        <td>2</td>
+        <td>Average</td>
+    </tr>
+    <tr>
+        <td>Wipro</td>
+        <td>55.4</td>
+        <td>3</td>
+        <td>Average</td>
+    </tr>
+    <tr style="background-color: #fff3cd;">
+        <td><strong>TechCorp India</strong></td>
+        <td><strong>52.7</strong></td>
+        <td><strong>4</strong></td>
+        <td><strong>Average</strong></td>
+    </tr>
+    <tr>
+        <td>HCL Technologies</td>
+        <td>49.3</td>
+        <td>5</td>
+        <td>Average</td>
+    </tr>
+    <tr>
+        <td>Tech Mahindra</td>
+        <td>47.1</td>
+        <td>6</td>
+        <td>Average</td>
+    </tr>
+</table>
+
+<p><strong>IT Sector Average:</strong> 54.1<br>
+<strong>TechCorp vs Sector:</strong> -1.4 points (Below Average)</p>
+
+<h3>Best in Class (Infosys) Comparison</h3>
+
+<table>
+    <tr>
+        <th>Dimension</th>
+        <th>Infosys</th>
+        <th>TechCorp</th>
+        <th>Gap</th>
+    </tr>
+    <tr>
+        <td>Representation Score</td>
+        <td>51.2%</td>
+        <td>41.5%</td>
+        <td>-9.7%</td>
+    </tr>
+    <tr>
+        <td>Progression Score</td>
+        <td>58.3%</td>
+        <td>49.4%</td>
+        <td>-8.9%</td>
+    </tr>
+    <tr>
+        <td>Retention Score</td>
+        <td>88.1%</td>
+        <td>85.8%</td>
+        <td>-2.3%</td>
+    </tr>
+</table>
+
+<div class="highlight">
+    <strong>KEY LEARNING FROM LEADER:</strong><br>
+    Infosys has better Middle→Senior pipeline (only 18% drop vs 20%) due to structured sponsorship program launched in 2021.
+</div>
+
+<hr>
+
+<h2>SUMMARY: TECHCORP INDIA EQUIVERSE SCORECARD</h2>
+
+<div class="scorecard">
+    <h2 style="text-align: center; color: #1a73e8; margin-top: 0;">EQUIVERSE INDEX SCORECARD</h2>
+    <h3 style="text-align: center; margin: 0;">TechCorp India Ltd (IT Sector)</h3>
+    
+    <hr>
+    
+    <div style="text-align: center;">
+        <p style="margin: 5px 0;">OVERALL EQUIVERSE SCORE</p>
+        <p class="score-large">52.73 / 100</p>
+        <p>RATING: <strong>AVERAGE</strong> | SECTOR RANK: <strong>4 of 6</strong></p>
+    </div>
+    
+    <hr>
+    
+    <h4>Dimension Scores:</h4>
+    <table>
+        <tr>
+            <td>Representation</td>
+            <td>41.5%</td>
+            <td>Below Average</td>
+        </tr>
+        <tr>
+            <td>Progression</td>
+            <td>49.4%</td>
+            <td>Average</td>
+        </tr>
+        <tr>
+            <td>Retention</td>
+            <td>85.8%</td>
+            <td>Strong</td>
+        </tr>
+    </table>
+    
+    <hr>
+    
+    <h4>Key Findings:</h4>
+    <ul>
+        <li>🚨 <strong>Bottleneck Tier:</strong> Junior → Middle Management (28.6% drop)</li>
+        <li>🚨 <strong>C-Suite Gap:</strong> Only 15% women (35% below parity)</li>
+        <li>✅ <strong>Strength:</strong> High retention rate (89.7%)</li>
+    </ul>
+    
+    <hr>
+    
+    <h4>Top 3 Recommendations:</h4>
+    <ol>
+        <li>Fix broken rung at Middle Management level</li>
+        <li>Accelerate C-Suite pipeline with board mandate</li>
+        <li>Improve parental leave return rate to 90%+</li>
+    </ol>
+    
+    <hr>
+    
+    <h4>Projection:</h4>
+    <ul>
+        <li>With moderate improvements: Parity achievable in <strong>8-10 years</strong></li>
+        <li>With aggressive targets: Parity achievable in <strong>5-6 years</strong></li>
+    </ul>
+</div>
+
+<hr>
+
+
+
+</body>
+</html>
