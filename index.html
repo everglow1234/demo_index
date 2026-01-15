@@ -98,6 +98,8 @@
             margin-bottom: 25px;
             padding-bottom: 15px;
             border-bottom: 3px solid #667eea;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .company-header h2 {
@@ -245,6 +247,158 @@
             border-radius: 15px;
             backdrop-filter: blur(10px);
         }
+
+        .view-details-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .view-details-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 3% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 900px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .close {
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            line-height: 1;
+        }
+
+        .close:hover {
+            transform: scale(1.2);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto;
+            max-height: calc(85vh - 100px);
+        }
+
+        .data-section {
+            margin-bottom: 30px;
+        }
+
+        .data-section h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .person-card {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #764ba2;
+            transition: all 0.3s ease;
+        }
+
+        .person-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .person-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .person-role {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 3px;
+        }
+
+        .person-gender {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .person-gender.female {
+            background: #fa709a;
+            color: white;
+        }
+
+        .person-gender.male {
+            background: #4facfe;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #c33;
+        }
     </style>
 </head>
 <body>
@@ -285,20 +439,23 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>🏥 Cipla Ltd</h2>
-                <div class="gender-ratio">Women: 16.7% | Men: 83.3%</div>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('cipla_management_data.txt', 'Cipla Ltd')">📋 View Detailed Data</button>
+                </div>
+                <div class="gender-ratio">Women: 12% | Men: 88%</div>
             </div>
             <div class="stats-grid">
                 <div class="stat-box male">
                     <h4>Men in Leadership</h4>
-                    <div class="value">20</div>
+                    <div class="value">22</div>
                 </div>
                 <div class="stat-box female">
                     <h4>Women in Leadership</h4>
-                    <div class="value">4</div>
+                    <div class="value">3</div>
                 </div>
                 <div class="stat-box">
                     <h4>Total Leaders</h4>
-                    <div class="value">24</div>
+                    <div class="value">25</div>
                 </div>
             </div>
             <div class="committees-section">
@@ -342,6 +499,9 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>💊 Divi's Laboratories</h2>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('divis_lab_management_data.txt', 'Divi\'s Laboratories')">📋 View Detailed Data</button>
+                </div>
                 <div class="gender-ratio">Women: 20% | Men: 80%</div>
             </div>
             <div class="stats-grid">
@@ -391,16 +551,19 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>💉 Dr. Reddy's Laboratories</h2>
-                <div class="gender-ratio">Women: 20.8% | Men: 79.2%</div>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('dr_reddys_management_data.txt', 'Dr. Reddy\'s Laboratories')">📋 View Detailed Data</button>
+                </div>
+                <div class="gender-ratio">Women: 16.7% | Men: 83.3%</div>
             </div>
             <div class="stats-grid">
                 <div class="stat-box male">
                     <h4>Men in Leadership</h4>
-                    <div class="value">19</div>
+                    <div class="value">20</div>
                 </div>
                 <div class="stat-box female">
                     <h4>Women in Leadership</h4>
-                    <div class="value">5</div>
+                    <div class="value">4</div>
                 </div>
                 <div class="stat-box">
                     <h4>Total Leaders</h4>
@@ -441,20 +604,23 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>💻 Tata Consultancy Services (TCS)</h2>
-                <div class="gender-ratio">Women: 9.7% | Men: 90.3%</div>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('tcs_management_data.txt', 'Tata Consultancy Services')">📋 View Detailed Data</button>
+                </div>
+                <div class="gender-ratio">Women: 8% | Men: 92%</div>
             </div>
             <div class="stats-grid">
                 <div class="stat-box male">
                     <h4>Men in Leadership</h4>
-                    <div class="value">28</div>
+                    <div class="value">23</div>
                 </div>
                 <div class="stat-box female">
                     <h4>Women in Leadership</h4>
-                    <div class="value">3</div>
+                    <div class="value">2</div>
                 </div>
                 <div class="stat-box">
                     <h4>Total Leaders</h4>
-                    <div class="value">31</div>
+                    <div class="value">25</div>
                 </div>
             </div>
             <div class="committees-section">
@@ -498,6 +664,9 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>🏦 ICICI Bank</h2>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('icici_management_data.txt', 'ICICI Bank')">📋 View Detailed Data</button>
+                </div>
                 <div class="gender-ratio">Women: 21.4% | Men: 78.6%</div>
             </div>
             <div class="stats-grid">
@@ -558,6 +727,9 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>⚡ Reliance Industries Limited</h2>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('reliance_management_data.txt', 'Reliance Industries')">📋 View Detailed Data</button>
+                </div>
                 <div class="gender-ratio">Women: 14.3% | Men: 85.7%</div>
             </div>
             <div class="stats-grid">
@@ -610,20 +782,23 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>🏦 State Bank of India</h2>
-                <div class="gender-ratio">Women: 14.3% | Men: 85.7%</div>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('sbi_management_data.txt', 'State Bank of India')">📋 View Detailed Data</button>
+                </div>
+                <div class="gender-ratio">Women: 21.1% | Men: 78.9%</div>
             </div>
             <div class="stats-grid">
                 <div class="stat-box male">
                     <h4>Men in Leadership</h4>
-                    <div class="value">30</div>
+                    <div class="value">15</div>
                 </div>
                 <div class="stat-box female">
                     <h4>Women in Leadership</h4>
-                    <div class="value">5</div>
+                    <div class="value">4</div>
                 </div>
                 <div class="stat-box">
                     <h4>Total Leaders</h4>
-                    <div class="value">35</div>
+                    <div class="value">19</div>
                 </div>
             </div>
             <div class="committees-section">
@@ -657,20 +832,23 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>💻 Infosys Limited</h2>
-                <div class="gender-ratio">Women: 6.4% | Men: 93.6%</div>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('infosys_management_data.txt', 'Infosys Ltd')">📋 View Detailed Data</button>
+                </div>
+                <div class="gender-ratio">Women: 10.5% | Men: 89.5%</div>
             </div>
             <div class="stats-grid">
                 <div class="stat-box male">
                     <h4>Men in Leadership</h4>
-                    <div class="value">44</div>
+                    <div class="value">17</div>
                 </div>
                 <div class="stat-box female">
                     <h4>Women in Leadership</h4>
-                    <div class="value">3</div>
+                    <div class="value">2</div>
                 </div>
                 <div class="stat-box">
                     <h4>Total Leaders</h4>
-                    <div class="value">47</div>
+                    <div class="value">19</div>
                 </div>
             </div>
             <div class="committees-section">
@@ -692,20 +870,23 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>💻 HCL Technologies</h2>
-                <div class="gender-ratio">Women: 13.3% | Men: 86.7%</div>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('hcltech_management_data.txt', 'HCLTech')">📋 View Detailed Data</button>
+                </div>
+                <div class="gender-ratio">Women: 27.8% | Men: 72.2%</div>
             </div>
             <div class="stats-grid">
                 <div class="stat-box male">
                     <h4>Men in Leadership</h4>
-                    <div class="value">26</div>
+                    <div class="value">13</div>
                 </div>
                 <div class="stat-box female">
                     <h4>Women in Leadership</h4>
-                    <div class="value">4</div>
+                    <div class="value">5</div>
                 </div>
                 <div class="stat-box">
                     <h4>Total Leaders</h4>
-                    <div class="value">30</div>
+                    <div class="value">18</div>
                 </div>
             </div>
             <div class="committees-section">
@@ -728,20 +909,23 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>📈 HDFC Securities</h2>
-                <div class="gender-ratio">Women: 10% | Men: 90%</div>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('hdfc_securities_management_data.txt', 'HDFC Securities')">📋 View Detailed Data</button>
+                </div>
+                <div class="gender-ratio">Women: 12.5% | Men: 87.5%</div>
             </div>
             <div class="stats-grid">
                 <div class="stat-box male">
                     <h4>Men in Leadership</h4>
-                    <div class="value">27</div>
+                    <div class="value">14</div>
                 </div>
                 <div class="stat-box female">
                     <h4>Women in Leadership</h4>
-                    <div class="value">3</div>
+                    <div class="value">2</div>
                 </div>
                 <div class="stat-box">
                     <h4>Total Leaders</h4>
-                    <div class="value">30</div>
+                    <div class="value">16</div>
                 </div>
             </div>
             <div class="committees-section">
@@ -763,6 +947,9 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>⛽ Oil and Natural Gas Corporation (ONGC)</h2>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('ongc_management_data.txt', 'ONGC')">📋 View Detailed Data</button>
+                </div>
                 <div class="gender-ratio">Women: 25% | Men: 75%</div>
             </div>
             <div class="stats-grid">
@@ -799,6 +986,9 @@
         <div class="company-section">
             <div class="company-header">
                 <h2>⛽ Indian Oil Corporation</h2>
+                <div>
+                    <button class="view-details-btn" onclick="viewDetails('indian_oil_management_data.txt', 'Indian Oil Corporation')">📋 View Detailed Data</button>
+                </div>
                 <div class="gender-ratio">Women: 12.5% | Men: 87.5%</div>
             </div>
             <div class="stats-grid">
@@ -845,19 +1035,449 @@
         </footer>
     </div>
 
+    <!-- Modal for detailed data -->
+    <div id="dataModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Company Details</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="loading">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hardcoded company data
+        const companyData = {
+            'cipla_management_data.txt': `===== CIPLA =====
+
+BOARD OF DIRECTORS:
+
+1. Dr Y K Hamied - Chairman - Audit Committee (Member), Nomination and Remuneration Committee (Chairperson)
+2. Mr M K Hamied - Vice Chairman - Investment and Risk Management Committee (Member), Stakeholders Relationship Committee (Member)
+3. Ms Samina Hamied - Group Executive, Non-Independent Director - Investment and Risk Management Committee (Chairperson), Stakeholders Relationship Committee (Chairperson)
+4. Mr Umang Vohra - Managing Director and Global Chief Executive Officer - Corporate Social Responsibility Committee (Member), Operations and Administrative Committee (Member)
+5. Mr S Radhakrishnan - Non-Executive, Non-Independent Director
+6. Mr Adil Zainulbhai - Independent Director
+7. Mr Ashok Sinha - Independent Director - Audit Committee (Chairperson)
+8. Dr Balram Bhargava - Independent Director
+9. Dr Mandar Vaidya - Independent Director
+10. Mr P R Ramesh - Independent Director - Operations and Administrative Committee (Chairperson)
+11. Ms Punita Lal - Independent Director
+12. Mr Robert Stewart - Independent Director - Corporate Social Responsibility Committee (Chairperson)
+
+MANAGEMENT COUNCIL:
+
+1. Mr Umang Vohra - Managing Director and Global Chief Executive Officer
+2. Mr Ashish Adukia - Global Chief Financial Officer
+3. Dr Raju Mistry - Global Chief People Officer
+4. Mr Pradeep Bhaduaria - Global Chief Executive Officer
+5. Mr Achin Gupta - CEO One India Business
+6. Mr Paul Miller - CEO Cipla South Africa and Regional Head Africa and Access
+7. Mr Marc Falkin - CEO North America and Europe
+8. Mr Swapn Malpani - CEO Emerging Markets
+9. Mr Vijayasarathi Ramaswami - Global Head of Quality
+10. Mr Rajeev Kumar Sinha - Global Chief Manufacturing Officer
+11. Dr Jaideep Gogtay - Global Chief Medical Officer
+12. Ms Sneha Hiranandani - Chief Information Officer
+13. Mr Sai Mungara - Global Head Supply Chain`,
+
+            'divis_lab_management_data.txt': `===== DIVI'S LABORATORIES =====
+
+BOARD MEMBERS:
+
+1. Dr. Murali K. Divi - Managing Director
+2. N. V. Ramana - Executive Director
+3. Dr. Ramesh B. V. Nimmagadda - Non-Executive Chairman & Independent Director - Stakeholders Relationship Committee (Chairman)
+4. Prof. S. Ganapaty - Independent Director
+5. Dr. Kiran S. Divi - Whole-time Director & Chief Executive Officer
+6. Nilima Prasad Divi - Whole-time Director (Commercial)
+7. K. V. Chowdary - Independent Director - Audit Committee (Chairman)
+8. Dr. Rajendra Kumar Premchand - Independent Director
+9. Dr. S. Devendra Rao - Whole-time Director (Manufacturing)
+10. Prof. Sunaina Singh - Independent Director`,
+
+            'dr_reddys_management_data.txt': `===== DR. REDDY'S LABORATORIES =====
+
+BOARD OF DIRECTORS:
+
+1. K Satish Reddy - Chairman
+2. G V Prasad - Co-Chairman and Managing Director
+3. Penny Wan - Independent Director
+4. Arun M Kumar - Independent Director
+5. Leo Puri - Independent Director
+6. Shikha Sharma - Independent Director
+7. Dr. Claudio Albrecht - Independent Director
+8. Dr. Alpna Seth - Independent Director
+9. Dr. K P Krishnan - Independent Director
+10. Sanjiv Mehta - Independent Director
+
+MANAGEMENT COUNCIL:
+
+1. K Satish Reddy - Chairman
+2. G V Prasad - Co-Chairman and Managing Director
+3. Erez Israeli - Chief Executive Officer
+4. M V Narasimham - Chief Financial Officer
+5. Archana Bhaskar - Chief Human Resource Officer
+6. Deepak Sapra - Chief Executive Officer, API and Services
+7. Dr. Jayanth Sridhar - Global Head of Biologics
+8. Krishna Venkatesh - Global Head of Quality & Pharmacovigilance
+9. M V Ramana - Chief Executive Officer, Branded Markets
+10. Phanimitra B - Chief Digital and Information Officer
+11. Milan Kalawadia - Chief Executive Officer, North America
+12. Patrick Aghanian - Chief Executive Officer, Europe Generics
+13. Sanjay Sharma - Head Global Operations
+14. Sushrut Kulkarni - Global Head – Integrated Product Development Organisation`,
+
+            'tcs_management_data.txt': `===== TATA CONSULTANCY SERVICES (TCS) =====
+
+BOARD OF DIRECTORS:
+
+1. N Chandrasekaran - Chairman
+2. Dr Pradeep Kumar Khosla - Independent Director
+3. Hanne Sorensen - Independent Director
+4. Keki Mistry - Independent Director
+5. K Krithivasan - CEO & MD
+6. Aarthi Subramanian - Executive Director - President & COO
+7. Al-Noor Ramji - Executive Director
+8. Sanjay V Bhandarkar - Executive Director
+
+MANAGEMENT TEAM:
+
+- K Krithivasan - Chief Executive Officer and Managing Director
+- Aarthi Subramanian - President and Chief Operating Officer
+- Samir Seksaria - Chief Financial Officer
+- Milind Lakkad - Chief Human Resources Officer
+- Mangesh Sathe - Chief Strategy Officer
+- Dr. Harrick Vin - Chief Technology Officer
+- Abhinav Kumar - Chief Marketing Officer
+- Susheel Vasudevan - Banking Financial Services and Insurance
+- Shankar Narayanan - Banking Financial Services and Insurance
+- Debashis Ghosh - Life Sciences, Healthcare, Energy
+- Krishnan Ramanujam - Consumer Business Group
+- Anupam Singhal - Manufacturing
+- V Rajanna - Technology, Software and Services
+- Amit Bajaj - North America
+- Amit Kapur - UK & Ireland
+- Sapthagiri Chapalapalli - Europe
+- Girish Ramachandran - Growth Markets`,
+
+            'icici_management_data.txt': `===== ICICI BANK LIMITED =====
+
+BOARD MEMBERS:
+
+1. Pradeep Kumar Sinha - Non-Executive Chairman
+2. Neelam Dhawan - Independent Director - Audit Committee (Chairperson)
+3. Radhakrishnan Nair - Independent Director
+4. B. Sriram - Independent Director
+5. S. Madhavan - Independent Director
+6. Vibha Paul Rishi - Independent Director - Stakeholders Relationship Committee (Chairperson)
+7. Rohit Bhasin - Independent Director - Risk Committee (Chairperson)
+8. Punit Sood - Independent Director
+9. Sandeep Bakhshi - Managing Director & CEO
+10. Sandeep Batra - Executive Director
+11. Rakesh Jha - Executive Director
+12. Ajay Kumar Gupta - Executive Director
+
+KEY PERSONNEL:
+
+- Anindya Banerjee - Group Chief Financial Officer
+- Prachiti Lalingkar - Company Secretary`,
+
+            'reliance_management_data.txt': `===== RELIANCE INDUSTRIES LIMITED =====
+
+BOARD OF DIRECTORS:
+
+1. Mukesh D. Ambani - Chairman and Managing Director
+2. Isha M. Ambani - Non-Executive Director
+3. Akash M. Ambani - Non-Executive Director
+4. Anant M. Ambani - Non-Executive Director
+5. Nikhil R. Meswani - Executive Director
+6. Hital R. Meswani - Executive Director - Environmental, Social and Governance Committee (Chairman)
+7. P.M.S. Prasad - Executive Director
+8. Raminder Singh Gujral - Independent Director - Audit Committee (Chairman), Risk Management Committee (Chairman)
+9. Dr. Shumeet Banerji - Independent Director - Human Resources Committee (Chairman), Corporate Social Responsibility Committee (Chairman)
+10. Arundhati Bhattacharya - Independent Director
+11. K. V. Chowdary - Independent Director
+12. Adil Zainulbhai - Independent Director
+13. Yasir Othman H. Al-Rumayyan - Independent Director
+14. K. Sethuraman - Independent Director`,
+
+            'sbi_management_data.txt': `===== STATE BANK OF INDIA =====
+
+BOARD OF DIRECTORS:
+
+1. Shri Challa Sreenivasulu Setty - Chairman
+2. Shri Ashwini Kumar Tewari - Managing Director (Corporate Banking)
+3. Shri Vinay M. Tonse - Managing Director (Retail Business & Operations)
+4. Shri Rana Ashutosh Kumar Singh - Managing Director (Risk, Compliance)
+5. Shri Rama Mohan Rao Amara - Managing Director (International Banking)
+6. CA. Ketan S. Vikamsey - Independent Director
+7. Shri Mrugank M. Paranjape - Independent Director
+8. Shri Rajesh Kumar Dubey - Independent Director
+9. CA. Dharmendra Singh Shekhawat - Independent Director
+10. Smt. Swati Gupta - Non-Executive Director
+11. Shri Nagaraju Maddirala - Non-Executive Director (Government Nominee)
+12. Shri Ajay Kumar - Non-Executive Director (RBI Nominee)
+
+SENIOR MANAGEMENT:
+
+1. Shri Ashok Kumar Sharma - DMD & CCO
+2. Shri Baldev Prakash - DMD & Group Chief Risk Officer
+3. Shri Binod Kumar Mishra - DMD (HR) & CDO
+4. Ms Jayati Bansal - DMD (International Banking Group)
+5. Shri Kshitij Mohan - DMD SARG
+6. Smt. Saloni Narayan - DMD (Stressed Assets Management)
+7. Smt. Ruma Dey - DMD (Credit Monitoring Group)`,
+
+            'infosys_management_data.txt': `===== INFOSYS LIMITED =====
+
+BOARD OF DIRECTORS:
+
+1. Nandan M. Nilekani - Chairman (Non-Independent)
+2. Salil Parekh - CEO and Managing Director
+3. D. Sundaram - Lead Independent Director
+4. Michael Gibbs - Independent Director
+5. Bobby Parikh - Independent Director
+6. Chitra Nayak - Independent Director
+7. Govind Iyer - Independent Director
+8. Helene Auriol Potier - Independent Director
+9. Nitin Paranjpe - Independent Director
+
+LEADERSHIP TEAM:
+
+- Salil Parekh - Chief Executive Officer
+- Jayesh Sanghrajka - Chief Financial Officer
+- Shaji Mathew - Chief Human Resources Officer
+- Sumit Virmani - Chief Marketing Officer
+- Mohammed Rafee Tarafdar - Chief Technology Officer
+- Dennis Kantiah Gada - Segment Head Banking and Financial Services
+- Anand Swaminathan - Segment Head Communication, Media and Technology
+- Jasmeet Singh - Segment Head Manufacturing
+- Ashiss Kumar Dash - Segment Head Energy, Utilities, Resources
+- Karmesh Gul Vaswani - Segment Head CPG, Logistics and Retail`,
+
+            'hcltech_management_data.txt': `===== HCL TECHNOLOGIES =====
+
+FOUNDER:
+
+1. Shiv Nadar - Founder, Chairman Emeritus
+
+BOARD OF DIRECTORS:
+
+1. Roshni Nadar Malhotra - Chairperson
+2. C Vijayakumar - CEO & Managing Director
+3. Shikhar Malhotra - Non-Executive Director
+4. Bhavani Balasubramanian - Independent Director
+5. Deepak Kapoor - Independent Director
+6. Lee Fang Chew - Independent Director
+7. Nishi Vasudeva - Independent Director
+8. Simon John - Independent Director
+9. Thomas Sieber - Independent Director
+10. Vanitha Narayanan - Independent Director
+
+LEADERSHIP TEAM:
+
+- C Vijayakumar - CEO & Managing Director
+- Shiv Walia - Chief Financial Officer
+- Ramachandran Sundararajan - Chief People Officer
+- Raghu Raman Lakshmanan - General Counsel
+- Jill Kouri - Chief Marketing Officer
+- Vijay Guntur - Chief Technology Officer
+- Rajiv Shesh - Chief Revenue Officer, HCLSoftware
+- Kevin McGee - Chief Risk Officer`,
+
+            'hdfc_securities_management_data.txt': `===== HDFC SECURITIES =====
+
+BOARD OF DIRECTORS:
+
+1. Mr. Neeraj Swaroop - Independent Director and Chairperson
+2. Mr. Dhiraj Relli - Managing Director & CEO
+3. Mrs. Vijay Laxmi Joshi - Independent Director
+4. Mr. Samir Bhatia - Independent Director
+5. Mr. Tarun Balram - Independent Director
+6. Mr. Arvind Vohra - Non-Executive Director (HDFC Bank Nominee)
+7. Mr. Ashish Rathi - Whole Time Director and COO
+8. Mr. Bhavesh Zaveri - Non-Executive Director (HDFC Bank Nominee)
+
+MANAGEMENT TEAM:
+
+- Dhiraj Relli - Managing Director & CEO
+- Ashish Rathi - Chief Operating Officer
+- Anand Mathur - Chief Financial Officer
+- Kunal Sanghavi - Chief Strategy Officer
+- Puneeth Bekal - Chief Marketing Officer
+- Neetika Bhatia - Chief Human Resources Officer
+- Amit Sharma - Chief Business Officer
+- Mufaddal Matcheswala - Chief Business Officer`,
+
+            'ongc_management_data.txt': `===== OIL AND NATURAL GAS CORPORATION (ONGC) =====
+
+BOARD OF DIRECTORS:
+
+1. Omkar Nath Gyani - Chairman
+2. Raminder Singh Sawhney - Director
+3. Chandrakant Raghunath Borikar - Director & CFO
+4. Nisha Dhingra - Director & Company Secretary`,
+
+            'indian_oil_management_data.txt': `===== INDIAN OIL CORPORATION =====
+
+BOARD OF DIRECTORS:
+
+1. Shri A S Sahney - Chairman
+2. Suman Kumar - Director (Planning and Business Development)
+3. Arvind Kumar - Director (Refineries)
+4. Rashmi Govil - Director (Human Resources)
+5. N Senthil Kumar - Director (Pipelines)
+6. V Satish Kumar - Director (Marketing)
+7. Alok Sharma - Director (Research and Development)
+8. Atul Jain - Director (Finance)`
+        };
+
+        // Modal functions
+        function viewDetails(filename, companyName) {
+            const modal = document.getElementById('dataModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modal.style.display = 'block';
+            modalTitle.textContent = companyName + ' - Detailed Leadership Data';
+            modalBody.innerHTML = '<div class="loading">Loading data...</div>';
+            
+            // Use hardcoded data
+            const data = companyData[filename];
+            if (data) {
+                modalBody.innerHTML = formatTextData(data);
+            } else {
+                modalBody.innerHTML = '<div class="error-message">⚠️ Error: Data not found for ' + companyName + '</div>';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('dataModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('dataModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function formatTextData(text) {
+            let html = '';
+            const lines = text.split('\n');
+            let currentSection = '';
+            let inSection = false;
+            
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+                
+                // Check if it's a section header
+                if (line.includes('===') || line.includes('---')) {
+                    continue;
+                }
+                
+                // Major section headers
+                if (line.match(/^(BOARD OF DIRECTORS|MANAGEMENT COUNCIL|MANAGEMENT TEAM|COMMITTEES|KEY PERSONNEL|SENIOR MANAGEMENT|LEADERSHIP TEAM|BOARD MEMBERS|EXECUTIVE DIRECTORS)/i)) {
+                    if (currentSection) {
+                        html += '</div>';
+                    }
+                    currentSection = line;
+                    html += '<div class="data-section"><h3>' + line + '</h3>';
+                    inSection = true;
+                    continue;
+                }
+                
+                // Person entry (starts with number or bullet)
+                if (line.match(/^\d+\./) || line.match(/^[•●◦-]\s/)) {
+                    const personData = parsePerson(line);
+                    html += formatPersonCard(personData);
+                } else if (inSection) {
+                    // Additional info or other content
+                    html += '<p class="person-role">' + line + '</p>';
+                }
+            }
+            
+            if (currentSection) {
+                html += '</div>';
+            }
+            
+            return html || '<p>No data available</p>';
+        }
+
+        function parsePerson(line) {
+            // Remove numbering/bullets
+            line = line.replace(/^\d+\.\s*/, '').replace(/^[•●◦-]\s*/, '');
+            
+            // Extract name and role
+            let name = '', role = '', gender = '';
+            
+            // Check for clear female indicators first
+            if (line.match(/\b(Ms\.|Mrs\.|Miss|Smt\.)\s/i)) {
+                gender = 'female';
+            } 
+            // Check for clear male indicators
+            else if (line.match(/\b(Mr\.|Shri)\s/i)) {
+                gender = 'male';
+            }
+            // For Dr. and Prof., check the name for gender clues
+            else if (line.match(/\b(Dr\.|Prof\.|Col\.|Capt\.|Cmde\.)\s/i)) {
+                // Common female name patterns (Indian and Western)
+                if (line.match(/\b(Sunaina|Nisha|Rashmi|Vibha|Neelam|Punita|Samina|Isha|Arundhati|Nilima|Shikha|Alpna|Penny|Archana|Chitra|Helene|Roshni|Bhavani|Nishi|Vanitha|Jill|Jayati|Saloni|Ruma|Neetika|Richa|Priyanka|Swati|Prachiti|Vijay Laxmi)\b/i)) {
+                    gender = 'female';
+                } else {
+                    gender = 'male';
+                }
+            }
+            
+            // Split by common delimiters
+            if (line.includes(' - ')) {
+                [name, role] = line.split(' - ', 2);
+            } else if (line.includes(', ')) {
+                [name, role] = line.split(', ', 2);
+            } else if (line.includes('(') && line.includes(')')) {
+                const match = line.match(/^(.+?)\s*\((.+?)\)/);
+                if (match) {
+                    name = match[1];
+                    role = match[2];
+                } else {
+                    name = line;
+                }
+            } else {
+                name = line;
+            }
+            
+            return { name: name.trim(), role: role.trim(), gender: gender };
+        }
+
+        function formatPersonCard(person) {
+            let roleHtml = person.role ? '<div class="person-role">💼 ' + person.role + '</div>' : '';
+            
+            return '<div class="person-card">' +
+                '<div class="person-name">' + person.name + '</div>' +
+                roleHtml +
+                '</div>';
+        }
+
+    </script>
     <script>
         // Calculate totals
         const companies = [
-            { name: 'Cipla', men: 20, women: 4 },
+            { name: 'Cipla', men: 22, women: 3 },
             { name: "Divi's Lab", men: 8, women: 2 },
-            { name: "Dr. Reddy's", men: 19, women: 5 },
-            { name: 'TCS', men: 28, women: 3 },
+            { name: "Dr. Reddy's", men: 20, women: 4 },
+            { name: 'TCS', men: 23, women: 2 },
             { name: 'ICICI Bank', men: 11, women: 3 },
             { name: 'Reliance', men: 12, women: 2 },
-            { name: 'SBI', men: 30, women: 5 },
-            { name: 'Infosys', men: 44, women: 3 },
-            { name: 'HCLTech', men: 26, women: 4 },
-            { name: 'HDFC Securities', men: 27, women: 3 },
+            { name: 'SBI', men: 15, women: 4 },
+            { name: 'Infosys', men: 17, women: 2 },
+            { name: 'HCLTech', men: 13, women: 5 },
+            { name: 'HDFC Securities', men: 14, women: 2 },
             { name: 'ONGC', men: 3, women: 1 },
             { name: 'Indian Oil', men: 7, women: 1 }
         ];
