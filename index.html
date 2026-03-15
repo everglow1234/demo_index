@@ -1,1610 +1,1127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leadership Gender Diversity Dashboard - Talentnomics</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BRSR Dashboard — Company Progress Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117; --panel: #1a1d2e; --card: #22263a; --border: #2e3354;
+    --accent: #6c63ff; --accent2: #00d4aa; --accent3: #ff6b9d; --accent4: #ffa94d;
+    --text: #e8eaf6; --muted: #8892b0; --good: #00d4aa; --bad: #ff6b9d; --warn: #ffa94d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #1a1d2e 0%, #0f1117 100%); border-bottom: 1px solid var(--border); padding: 20px 32px; display: flex; align-items: center; gap: 16px; }
+  header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+  header span { color: var(--muted); font-size: 0.875rem; }
+  .badge { background: var(--accent); color: #fff; border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            color: #333;
-        }
+  /* Layout */
+  .main { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 65px); }
+  .sidebar { background: var(--panel); border-right: 1px solid var(--border); padding: 20px 16px; overflow-y: auto; }
+  .content { padding: 24px; overflow-y: auto; }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+  /* Sidebar */
+  .sidebar h3 { font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; padding: 0 4px; }
+  .search-box { width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 12px; font-size: 0.875rem; margin-bottom: 12px; outline: none; }
+  .search-box:focus { border-color: var(--accent); }
+  .company-list { list-style: none; max-height: 500px; overflow-y: auto; }
+  .company-list li { padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: var(--muted); border: 1px solid transparent; margin-bottom: 2px; transition: all 0.15s; }
+  .company-list li:hover { background: var(--card); color: var(--text); border-color: var(--border); }
+  .company-list li.active { background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(0,212,170,0.1)); color: var(--text); border-color: var(--accent); }
+  .sector-tag { display: inline-block; background: rgba(108,99,255,0.15); color: var(--accent); border-radius: 4px; padding: 1px 5px; font-size: 0.65rem; margin-top: 2px; }
 
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-            padding: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-        }
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+  .tab-btn { background: none; border: none; color: var(--muted); font-size: 0.875rem; padding: 10px 18px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; font-weight: 500; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover { color: var(--text); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
 
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+  /* Cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .kpi-card .label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .kpi-card .value { font-size: 1.5rem; font-weight: 700; }
+  .kpi-card .sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  .kpi-card .trend { font-size: 0.75rem; margin-top: 4px; }
+  .trend.up { color: var(--good); }
+  .trend.down { color: var(--bad); }
+  .trend.flat { color: var(--warn); }
 
-        header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  .chart-grid.single { grid-template-columns: 1fr; }
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .chart-card h4 { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; }
+  .chart-wrap { position: relative; height: 220px; }
 
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+  /* Compare Tab */
+  .compare-controls { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 0.75rem; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; }
+  select, .compare-year { background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 8px 12px; font-size: 0.85rem; outline: none; cursor: pointer; }
+  select:focus { border-color: var(--accent); }
+  .btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 9px 18px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn.secondary { background: var(--card); border: 1px solid var(--border); color: var(--muted); }
 
-        .summary-card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  th { background: var(--bg); color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; font-size: 0.7rem; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 10px 14px; border-bottom: 1px solid rgba(46,51,84,0.5); color: var(--text); }
+  tr:hover td { background: rgba(108,99,255,0.05); }
+  .pill { display: inline-block; border-radius: 12px; padding: 2px 8px; font-size: 0.7rem; font-weight: 600; }
+  .pill.green { background: rgba(0,212,170,0.15); color: var(--good); }
+  .pill.red { background: rgba(255,107,157,0.15); color: var(--bad); }
+  .pill.yellow { background: rgba(255,169,77,0.15); color: var(--warn); }
+  .pill.blue { background: rgba(108,99,255,0.15); color: var(--accent); }
 
-        .summary-card:hover {
-            transform: translateY(-5px);
-        }
+  .section-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
 
-        .summary-card h3 {
-            color: #667eea;
-            font-size: 1.1em;
-            margin-bottom: 15px;
-        }
+  /* No data */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
 
-        .summary-card .number {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #764ba2;
-            margin-bottom: 5px;
-        }
+  /* Radar / comparison */
+  .compare-chart-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 28px; }
 
-        .summary-card .label {
-            color: #666;
-            font-size: 0.9em;
-        }
+  /* Star rating for progress */
+  .progress-bar-wrap { margin: 4px 0; }
+  .progress-bar-bg { background: var(--border); border-radius: 4px; height: 6px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
 
-        .company-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .company-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #667eea;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .company-header h2 {
-            color: #667eea;
-            font-size: 1.8em;
-        }
-
-        .gender-ratio {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .stat-box {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            padding: 20px;
-            border-radius: 10px;
-            color: white;
-            text-align: center;
-        }
-
-        .stat-box.male {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .stat-box.female {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        .stat-box h4 {
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            opacity: 0.9;
-        }
-
-        .stat-box .value {
-            font-size: 2em;
-            font-weight: bold;
-        }
-
-        .committees-section {
-            margin-top: 20px;
-        }
-
-        .committees-section h3 {
-            color: #764ba2;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-
-        .committee-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 15px;
-        }
-
-        .committee-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-
-        .committee-item h4 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1em;
-        }
-
-        .committee-members {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .member-badge {
-            background: #667eea;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.85em;
-        }
-
-        .member-badge.female {
-            background: #fa709a;
-        }
-
-        .member-badge.chair {
-            border: 2px solid gold;
-            font-weight: bold;
-        }
-
-        .chart-container {
-            margin: 30px 0;
-            height: 400px;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-
-        .legend {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 20px 0;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .legend-color {
-            width: 30px;
-            height: 20px;
-            border-radius: 4px;
-        }
-
-        .legend-color.male {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .legend-color.female {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        footer {
-            text-align: center;
-            color: white;
-            margin-top: 40px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-        }
-
-        .view-details-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .view-details-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background: white;
-            margin: 3% auto;
-            padding: 0;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 900px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px 30px;
-            border-radius: 15px 15px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.8em;
-        }
-
-        .close {
-            color: white;
-            font-size: 35px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            line-height: 1;
-        }
-
-        .close:hover {
-            transform: scale(1.2);
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-        }
-
-        .modal-body {
-            padding: 30px;
-            overflow-y: auto;
-            max-height: calc(85vh - 100px);
-        }
-
-        .data-section {
-            margin-bottom: 30px;
-        }
-
-        .data-section h3 {
-            color: #667eea;
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-
-        .person-card {
-            background: #f8f9fa;
-            padding: 15px 20px;
-            margin: 10px 0;
-            border-radius: 10px;
-            border-left: 4px solid #764ba2;
-            transition: all 0.3s ease;
-        }
-
-        .person-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .person-name {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .person-role {
-            color: #666;
-            font-size: 0.95em;
-            margin-bottom: 3px;
-        }
-
-        .person-gender {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        .person-gender.female {
-            background: #fa709a;
-            color: white;
-        }
-
-        .person-gender.male {
-            background: #4facfe;
-            color: white;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-size: 1.2em;
-            color: #667eea;
-        }
-
-        .error-message {
-            background: #fee;
-            color: #c33;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #c33;
-        }
-    </style>
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .sidebar { max-height: 280px; }
+    .chart-grid { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎯 Leadership Gender Diversity Dashboard</h1>
-            <p>Comprehensive Analysis of Board & Management Composition Across Companies</p>
-        </header>
 
-        <div class="summary-cards">
-            <div class="summary-card">
-                <h3>Total Companies</h3>
-                <div class="number">12</div>
-                <div class="label">Analyzed</div>
-            </div>
-            <div class="summary-card">
-                <h3>Total Leaders</h3>
-                <div class="number" id="totalLeaders">0</div>
-                <div class="label">Board & Management</div>
-            </div>
-            <div class="summary-card">
-                <h3>Women Leaders</h3>
-                <div class="number" id="totalWomen">0</div>
-                <div class="label">Across all companies</div>
-            </div>
-            <div class="summary-card">
-                <h3>Average Women %</h3>
-                <div class="number" id="avgWomenPercent">0</div>
-                <div class="label">Gender Representation</div>
-            </div>
-        </div>
+<header>
+  <div>
+    <h1>BRSR Dashboard</h1>
+    <span>Business Responsibility & Sustainability Report — 2021–22 to 2024–25</span>
+  </div>
+  <span class="badge" id="total-companies-badge">— companies</span>
+  <label for="csv-upload-input" title="Upload a new brsr.csv to refresh all data" style="margin-left:auto;background:rgba(108,99,255,0.18);border:1px solid var(--accent);color:var(--accent);border-radius:6px;padding:6px 14px;font-size:0.8rem;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Upload CSV
+  </label>
+  <input type="file" id="csv-upload-input" accept=".csv" style="display:none"/>
+  <span id="upload-status" style="font-size:0.75rem;color:var(--good);display:none;">✓ Loaded</span>
+</header>
 
-        <div class="chart-container">
-            <canvas id="overviewChart"></canvas>
-        </div>
+<div class="main">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h3>Companies</h3>
+    <input class="search-box" id="company-search" placeholder="Search company..." />
+    <ul class="company-list" id="company-list"></ul>
+  </aside>
 
-        <!-- Cipla -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>🏥 Cipla Ltd</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('cipla_management_data.txt', 'Cipla Ltd')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 12% | Men: 88%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">22</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">3</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">25</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Committee Participation by Gender</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Audit Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge chair">Dr Y K Hamied (Chair)</span>
-                            <span class="member-badge">Mr S Radhakrishnan</span>
-                            <span class="member-badge">Mr Adil Zainulbhai</span>
-                            <span class="member-badge">Mr Ashok Sinha</span>
-                            <span class="member-badge">Mr P R Ramesh</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Investment & Risk Management</h4>
-                        <div class="committee-members">
-                            <span class="member-badge female chair">Ms Samina Hamied (Chair)</span>
-                            <span class="member-badge">Mr M K Hamied</span>
-                            <span class="member-badge">Mr S Radhakrishnan</span>
-                            <span class="member-badge">Mr Adil Zainulbhai</span>
-                            <span class="member-badge female">Ms Punita Lal</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Stakeholders Relationship</h4>
-                        <div class="committee-members">
-                            <span class="member-badge female chair">Ms Samina Hamied (Chair)</span>
-                            <span class="member-badge">Mr M K Hamied</span>
-                            <span class="member-badge">Mr S Radhakrishnan</span>
-                            <span class="member-badge">Mr Ashok Sinha</span>
-                            <span class="member-badge female">Ms Punita Lal</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Divi's Laboratories -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>💊 Divi's Laboratories</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('divis_lab_management_data.txt', 'Divi\'s Laboratories')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 20% | Men: 80%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">8</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">2</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">10</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Committee Participation by Gender</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Audit Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge chair">K. V. Chowdary (Chair)</span>
-                            <span class="member-badge">Dr. Ramesh B. V. Nimmagadda</span>
-                            <span class="member-badge">Prof. S. Ganapaty</span>
-                            <span class="member-badge female">Nilima Prasad Divi</span>
-                            <span class="member-badge">Dr. Rajendra Kumar Premchand</span>
-                            <span class="member-badge">Dr. S. Devendra Rao</span>
-                            <span class="member-badge female">Prof. Sunaina Singh</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Corporate Social Responsibility</h4>
-                        <div class="committee-members">
-                            <span class="member-badge chair">Dr. Ramesh B. V. Nimmagadda (Chair)</span>
-                            <span class="member-badge">Prof. S. Ganapaty</span>
-                            <span class="member-badge">Dr. Murali K. Divi</span>
-                            <span class="member-badge female">Nilima Prasad Divi</span>
-                            <span class="member-badge">K. V. Chowdary</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Dr. Reddy's -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>💉 Dr. Reddy's Laboratories</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('dr_reddys_management_data.txt', 'Dr. Reddy\'s Laboratories')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 16.7% | Men: 83.3%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">20</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">4</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">24</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Committee Participation by Gender</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Audit Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge">K Satish Reddy</span>
-                            <span class="member-badge">G V Prasad</span>
-                            <span class="member-badge female">Penny Wan</span>
-                            <span class="member-badge">Leo Puri</span>
-                            <span class="member-badge female">Shikha Sharma</span>
-                            <span class="member-badge">Dr. Claudio Albrecht</span>
-                            <span class="member-badge female">Dr. Alpna Seth</span>
-                            <span class="member-badge">Dr. K P Krishnan</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Risk Management Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge">G V Prasad</span>
-                            <span class="member-badge">Arun M Kumar</span>
-                            <span class="member-badge female">Dr. Alpna Seth</span>
-                            <span class="member-badge">Dr. K P Krishnan</span>
-                            <span class="member-badge">Sanjiv Mehta</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TCS -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>💻 Tata Consultancy Services (TCS)</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('tcs_management_data.txt', 'Tata Consultancy Services')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 8% | Men: 92%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">23</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">2</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">25</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Committee Participation by Gender</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Audit Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge">N Chandrasekaran</span>
-                            <span class="member-badge female">Hanne Sorensen</span>
-                            <span class="member-badge">K Krithivasan</span>
-                            <span class="member-badge">Al-Noor Ramji</span>
-                            <span class="member-badge">Sanjay V Bhandarkar</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Risk Management Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge female">Hanne Sorensen</span>
-                            <span class="member-badge">Keki Mistry</span>
-                            <span class="member-badge">K Krithivasan</span>
-                            <span class="member-badge">Sanjay V Bhandarkar</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Executive Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge female chair">Aarthi Subramanian</span>
-                            <span class="member-badge">Dr Pradeep Kumar Khosla</span>
-                            <span class="member-badge">Keki Mistry</span>
-                            <span class="member-badge">K Krithivasan</span>
-                            <span class="member-badge">Al-Noor Ramji</span>
-                            <span class="member-badge">Sanjay V Bhandarkar</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ICICI Bank -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>🏦 ICICI Bank</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('icici_management_data.txt', 'ICICI Bank')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 21.4% | Men: 78.6%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">11</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">3</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">14</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Committee Participation by Gender</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Audit Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge female chair">Neelam Dhawan (Chair)</span>
-                            <span class="member-badge">Rohit Bhasin</span>
-                            <span class="member-badge">Punit Sood</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Board Governance, Remuneration & Nomination</h4>
-                        <div class="committee-members">
-                            <span class="member-badge female chair">Neelam Dhawan (Chair)</span>
-                            <span class="member-badge">B. Sriram</span>
-                            <span class="member-badge">Pradeep Kumar Sinha</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Stakeholders Relationship Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge female chair">Vibha Paul Rishi (Chair)</span>
-                            <span class="member-badge">Sandeep Batra</span>
-                            <span class="member-badge">Ajay Kumar Gupta</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Customer Service Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge female chair">Vibha Paul Rishi (Chair)</span>
-                            <span class="member-badge">S. Madhavan</span>
-                            <span class="member-badge">Sandeep Bakhshi</span>
-                            <span class="member-badge">Rakesh Jha</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Reliance -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>⚡ Reliance Industries Limited</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('reliance_management_data.txt', 'Reliance Industries')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 14.3% | Men: 85.7%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">12</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">2</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">14</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Committee Participation by Gender</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Audit Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge chair">Raminder Singh Gujral (Chair)</span>
-                            <span class="member-badge">K. V. Chowdary</span>
-                            <span class="member-badge">Haigreve Khaitan</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Environmental, Social and Governance</h4>
-                        <div class="committee-members">
-                            <span class="member-badge chair">Hital R. Meswani (Chair)</span>
-                            <span class="member-badge female">Arundhati Bhattacharya</span>
-                            <span class="member-badge">P.M.S. Prasad</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Stakeholders' Relationship</h4>
-                        <div class="committee-members">
-                            <span class="member-badge chair">K. V. Chowdary (Chair)</span>
-                            <span class="member-badge female">Arundhati Bhattacharya</span>
-                            <span class="member-badge">Nikhil R. Meswani</span>
-                            <span class="member-badge">Hital R. Meswani</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SBI -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>🏦 State Bank of India</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('sbi_management_data.txt', 'State Bank of India')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 21.1% | Men: 78.9%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">15</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">4</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">19</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Committee Participation by Gender</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Audit Committee of the Board</h4>
-                        <div class="committee-members">
-                            <span class="member-badge chair">Shri Ketan S. Vikamsey (Chair)</span>
-                            <span class="member-badge">Shri Mrugank M. Paranjape</span>
-                            <span class="member-badge">Shri Rajesh Kumar Dubey</span>
-                            <span class="member-badge">Shri Ajay Kumar</span>
-                        </div>
-                    </div>
-                    <div class="committee-item">
-                        <h4>Stakeholders Relationship Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge chair">Shri Rajesh Kumar Dubey (Chair)</span>
-                            <span class="member-badge">Shri Ketan S. Vikamsey</span>
-                            <span class="member-badge">Shri Dharmendra Singh Shekhawat</span>
-                            <span class="member-badge female">Smt. Swati Gupta</span>
-                            <span class="member-badge">Shri Vinay M. Tonse</span>
-                            <span class="member-badge">Shri Rama Mohan Rao Amara</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Infosys -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>💻 Infosys Limited</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('infosys_management_data.txt', 'Infosys Ltd')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 10.5% | Men: 89.5%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">17</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">2</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">19</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Committee Participation by Gender</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Audit Committee</h4>
-                        <div class="committee-members">
-                            <span class="member-badge female">Chitra Nayak</span>
-                            <span class="member-badge">Bobby Parikh</span>
-                            <span class="member-badge">D. Sundaram</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- HCLTech -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>💻 HCL Technologies</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('hcltech_management_data.txt', 'HCLTech')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 27.8% | Men: 72.2%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">13</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">5</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">18</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Committee Participation by Gender</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Board Members</h4>
-                        <div class="committee-members">
-                            <span class="member-badge female">Roshni Nadar Malhotra (Chairperson)</span>
-                            <span class="member-badge">C Vijayakumar (CEO & MD)</span>
-                            <span class="member-badge female">Bhavani Balasubramanian</span>
-                            <span class="member-badge female">Vanitha Narayanan</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- HDFC Securities -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>📈 HDFC Securities</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('hdfc_securities_management_data.txt', 'HDFC Securities')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 12.5% | Men: 87.5%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">14</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">2</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">16</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Committee Participation by Gender</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Board Members</h4>
-                        <div class="committee-members">
-                            <span class="member-badge female">Mrs. Vijay Laxmi Joshi (Independent)</span>
-                            <span class="member-badge">Mr. Neeraj Swaroop (Chairman)</span>
-                            <span class="member-badge">Mr. Dhiraj Relli (MD & CEO)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ONGC -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>⛽ Oil and Natural Gas Corporation (ONGC)</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('ongc_management_data.txt', 'ONGC')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 25% | Men: 75%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">3</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">1</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">4</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Board Members</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Leadership Team</h4>
-                        <div class="committee-members">
-                            <span class="member-badge">Omkar Nath Gyani (Chairman)</span>
-                            <span class="member-badge">Raminder Singh Sawhney (Director)</span>
-                            <span class="member-badge">Chandrakant Raghunath Borikar (Director & CFO)</span>
-                            <span class="member-badge female">Nisha Dhingra (Director & Company Secretary)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Indian Oil -->
-        <div class="company-section">
-            <div class="company-header">
-                <h2>⛽ Indian Oil Corporation</h2>
-                <div>
-                    <button class="view-details-btn" onclick="viewDetails('indian_oil_management_data.txt', 'Indian Oil Corporation')">📋 View Detailed Data</button>
-                </div>
-                <div class="gender-ratio">Women: 12.5% | Men: 87.5%</div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box male">
-                    <h4>Men in Leadership</h4>
-                    <div class="value">7</div>
-                </div>
-                <div class="stat-box female">
-                    <h4>Women in Leadership</h4>
-                    <div class="value">1</div>
-                </div>
-                <div class="stat-box">
-                    <h4>Total Leaders</h4>
-                    <div class="value">8</div>
-                </div>
-            </div>
-            <div class="committees-section">
-                <h3>Board Members</h3>
-                <div class="committee-list">
-                    <div class="committee-item">
-                        <h4>Leadership Team</h4>
-                        <div class="committee-members">
-                            <span class="member-badge">Shri A S Sahney (Chairman)</span>
-                            <span class="member-badge">Suman Kumar</span>
-                            <span class="member-badge">Arvind Kumar</span>
-                            <span class="member-badge female">Rashmi Govil (HR Director)</span>
-                            <span class="member-badge">N Senthil Kumar</span>
-                            <span class="member-badge">V Satish Kumar</span>
-                            <span class="member-badge">Alok Sharma</span>
-                            <span class="member-badge">Atul Jain</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="chart-container">
-            <canvas id="comparisonChart"></canvas>
-        </div>
-
-        <footer>
-            <p>💼 Dashboard Generated: January 2026 | Data Source: Company Annual Reports & Board Disclosures</p>
-            <p>📊 Analysis includes Board of Directors & Senior Management positions</p>
-        </footer>
+  <!-- MAIN CONTENT -->
+  <div class="content">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="overview">Company Overview</button>
+      <button class="tab-btn" data-tab="compare">Cross-Company Compare</button>
+      <button class="tab-btn" data-tab="heatmap">Sector Heatmap</button>
     </div>
 
-    <!-- Modal for detailed data -->
-    <div id="dataModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Company Details</h2>
-                <span class="close" onclick="closeModal()">&times;</span>
-            </div>
-            <div class="modal-body" id="modalBody">
-                <div class="loading">Loading...</div>
-            </div>
+    <!-- TAB: OVERVIEW -->
+    <div class="tab-pane active" id="tab-overview">
+      <div id="overview-empty" class="empty-state">
+        <div class="icon">🏢</div>
+        <p>Select a company from the sidebar to view its BRSR progress</p>
+      </div>
+      <div id="overview-content" style="display:none;">
+        <div style="margin-bottom:20px;">
+          <h2 id="ov-company-name" style="font-size:1.3rem;font-weight:700;"></h2>
+          <span id="ov-sector-tag" class="sector-tag"></span>
         </div>
+        <!-- KPI Row -->
+        <div class="kpi-grid" id="ov-kpis"></div>
+
+        <!-- Row 1: Gender charts -->
+        <p class="section-title">Gender Representation Trends</p>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h4>Female Employee % — All Years</h4>
+            <div class="chart-wrap"><canvas id="chart-emp-gender"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>Board Women % — All Years</h4>
+            <div class="chart-wrap"><canvas id="chart-board-gender"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Row 2: Pay Gap -->
+        <p class="section-title">Pay Gap Ratios (Female/Male — 1.0 = Parity)</p>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h4>Employee Pay Gap Ratio</h4>
+            <div class="chart-wrap"><canvas id="chart-paygap-emp"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>Worker Pay Gap Ratio</h4>
+            <div class="chart-wrap"><canvas id="chart-paygap-wkr"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Row 3: Attrition -->
+        <p class="section-title">Attrition Rates</p>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h4>Total vs Female Attrition %</h4>
+            <div class="chart-wrap"><canvas id="chart-attrition"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>Employee & Worker Headcount</h4>
+            <div class="chart-wrap"><canvas id="chart-headcount"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Row 4: KMP -->
+        <p class="section-title">Leadership Composition</p>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h4>KMP Women %</h4>
+            <div class="chart-wrap"><canvas id="chart-kmp"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>BoD Median Salary — Male vs Female (₹ Lakhs)</h4>
+            <div class="chart-wrap"><canvas id="chart-bod-salary"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Raw data table -->
+        <p class="section-title">Year-on-Year Data Table</p>
+        <div class="table-wrap">
+          <table id="ov-table">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Employees</th>
+                <th>Female Emp %</th>
+                <th>Workers</th>
+                <th>Female Wkr %</th>
+                <th>Board Women %</th>
+                <th>KMP Women %</th>
+                <th>Emp PayGap</th>
+                <th>Wkr PayGap</th>
+                <th>Attrition Total %</th>
+                <th>Attrition Female %</th>
+              </tr>
+            </thead>
+            <tbody id="ov-table-body"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-    <script>
-        // Hardcoded company data
-        const companyData = {
-            'cipla_management_data.txt': `===== CIPLA =====
+    <!-- TAB: COMPARE -->
+    <div class="tab-pane" id="tab-compare">
+      <div class="compare-controls">
+        <div class="form-group">
+          <label>YEAR</label>
+          <select id="cmp-year">
+            <option value="2021-22">2021-22</option>
+            <option value="2022-23">2022-23</option>
+            <option value="2023-24">2023-24</option>
+            <option value="2024-25" selected>2024-25</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>METRIC</label>
+          <select id="cmp-metric">
+            <option value="Female_employee_%">Female Employee %</option>
+            <option value="Board_women_%">Board Women %</option>
+            <option value="KMP_women_%">KMP Women %</option>
+            <option value="Pay_Gap_Employees">Employee Pay Gap Ratio</option>
+            <option value="Pay_Gap_Workers">Worker Pay Gap Ratio</option>
+            <option value="Attrition_Rate_Total_%">Attrition Rate Total %</option>
+            <option value="Attrition_Rate_Female_%">Attrition Rate Female %</option>
+            <option value="Female_workers_%">Female Workers %</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>SECTOR FILTER</label>
+          <select id="cmp-sector">
+            <option value="ALL">All Sectors</option>
+          </select>
+        </div>
 
-BOARD OF DIRECTORS:
+        <button class="btn" id="cmp-render-btn">Update Chart</button>
+      </div>
 
-1. Dr Y K Hamied - Chairman - Audit Committee (Member), Nomination and Remuneration Committee (Chairperson)
-2. Mr M K Hamied - Vice Chairman - Investment and Risk Management Committee (Member), Stakeholders Relationship Committee (Member)
-3. Ms Samina Hamied - Group Executive, Non-Independent Director - Investment and Risk Management Committee (Chairperson), Stakeholders Relationship Committee (Chairperson)
-4. Mr Umang Vohra - Managing Director and Global Chief Executive Officer - Corporate Social Responsibility Committee (Member), Operations and Administrative Committee (Member)
-5. Mr S Radhakrishnan - Non-Executive, Non-Independent Director
-6. Mr Adil Zainulbhai - Independent Director
-7. Mr Ashok Sinha - Independent Director - Audit Committee (Chairperson)
-8. Dr Balram Bhargava - Independent Director
-9. Dr Mandar Vaidya - Independent Director
-10. Mr P R Ramesh - Independent Director - Operations and Administrative Committee (Chairperson)
-11. Ms Punita Lal - Independent Director
-12. Mr Robert Stewart - Independent Director - Corporate Social Responsibility Committee (Chairperson)
+      <div class="chart-card" style="margin-bottom:24px;">
+        <h4 id="cmp-chart-title">Cross-Company Comparison</h4>
+        <div style="position:relative;height:420px;"><canvas id="chart-compare-bar"></canvas></div>
+      </div>
 
-MANAGEMENT COUNCIL:
+      <p class="section-title">Ranking Table</p>
+      <div class="table-wrap" id="cmp-table-wrap"></div>
+    </div>
 
-1. Mr Umang Vohra - Managing Director and Global Chief Executive Officer
-2. Mr Ashish Adukia - Global Chief Financial Officer
-3. Dr Raju Mistry - Global Chief People Officer
-4. Mr Pradeep Bhaduaria - Global Chief Executive Officer
-5. Mr Achin Gupta - CEO One India Business
-6. Mr Paul Miller - CEO Cipla South Africa and Regional Head Africa and Access
-7. Mr Marc Falkin - CEO North America and Europe
-8. Mr Swapn Malpani - CEO Emerging Markets
-9. Mr Vijayasarathi Ramaswami - Global Head of Quality
-10. Mr Rajeev Kumar Sinha - Global Chief Manufacturing Officer
-11. Dr Jaideep Gogtay - Global Chief Medical Officer
-12. Ms Sneha Hiranandani - Chief Information Officer
-13. Mr Sai Mungara - Global Head Supply Chain`,
+    <!-- TAB: HEATMAP -->
+    <div class="tab-pane" id="tab-heatmap">
+      <div class="compare-controls">
+        <div class="form-group">
+          <label>METRIC</label>
+          <select id="hm-metric">
+            <option value="Female_employee_%">Female Employee %</option>
+            <option value="Board_women_%">Board Women %</option>
+            <option value="KMP_women_%">KMP Women %</option>
+            <option value="Pay_Gap_Employees">Employee Pay Gap Ratio</option>
+            <option value="Attrition_Rate_Total_%">Attrition Total %</option>
+            <option value="Female_workers_%">Female Workers %</option>
+          </select>
+        </div>
+        <button class="btn" id="hm-render-btn">Update</button>
+      </div>
 
-            'divis_lab_management_data.txt': `===== DIVI'S LABORATORIES =====
+      <div id="heatmap-container" style="overflow-x:auto;"></div>
 
-BOARD MEMBERS:
+      <!-- Sector bubble summary -->
+      <p class="section-title" style="margin-top:28px;">Sector Average — All Years</p>
+      <div class="chart-card">
+        <h4 id="sector-chart-title">Sector Average: Female Employee %</h4>
+        <div style="position:relative;height:340px;"><canvas id="chart-sector-bars"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-1. Dr. Murali K. Divi - Managing Director
-2. N. V. Ramana - Executive Director
-3. Dr. Ramesh B. V. Nimmagadda - Non-Executive Chairman & Independent Director - Stakeholders Relationship Committee (Chairman)
-4. Prof. S. Ganapaty - Independent Director
-5. Dr. Kiran S. Divi - Whole-time Director & Chief Executive Officer
-6. Nilima Prasad Divi - Whole-time Director (Commercial)
-7. K. V. Chowdary - Independent Director - Audit Committee (Chairman)
-8. Dr. Rajendra Kumar Premchand - Independent Director
-9. Dr. S. Devendra Rao - Whole-time Director (Manufacturing)
-10. Prof. Sunaina Singh - Independent Director`,
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const RAW_CSV = `"Company","Sector","Employee_total","Female_employee","Female_employee_%","Male_employee","Male_employee_%","Workers_total","Female_workers","Female_workers_%","Male_workers","Male_workers_%","Board_total","Board_women","Board_women_%","KMP_total","KMP_women","KMP_women_%","Median_Salary_Male_BoD_INRLakhs","Median_Salary_Female_BoD_INRLakhs","Pay_Gap_BoD","Median_Salary_Male_KMP_INRLakhs","Median_Salary_Female_KMP_INRLakhs","Pay_Gap_KMP","Median_Salary_Male_Employees_INRLakhs","Median_Salary_Female_Employees_INRLakhs","Pay_Gap_Employees","Median_Salary_Male_Workers_INRLakhs","Median_Salary_Female_Workers_INRLakhs","Pay_Gap_Workers","Revenue_INRCrores","EBITDA_INRCrores","Net_profit_INRCrores","ROE_%","Attrition_Rate_Total_%","Attrition_Rate_Female_%","Women_KMP_Grown_Internally","Upskilling_Hrs_Total","Upskilling_Hrs_Female","Leadership_Training_Programs","Year"
+"3M India Limited","Manufacturing","1132","141","12.5","991","87.5","858","48","5.6","810","94.4","8","2","25","3","1","33","","","","","","","","","","","","","","","","","8.94","13","","934","","","2021-22"
+"3M India Limited","Manufacturing","1042","162","15.55","880","84.45","1112","66","5.94","1046","94.06","8","3","37.5","3","1","33.33","","","","","","","","","","","","","","","","","8.79","16","","1097","146","","2022-23"
+"3M India Limited","Manufacturing","935","145","16","790","84","750","66","9","684","91","7","3","43","3","1","33","30.40","85.93","2.825","223.71","145.45","0.650","26.88","24.79","0.922","8.45","3.18","0.376","","","","","9","12","","","","","2023-24"
+"3M India Limited","Manufacturing","1085","176","16.21","909","84","789","69","9","720","91","6","3","50","3","0","0","245.63","72.34","0.295","77.23","106.26","1.376","26.23","18.07","0.689","9.63","3.25","0.337","4445.56","","","","11","17","","1239","183","8","2024-25"
+"Adani Ports and Special Economic Zone Limited","Ports & Logistics","2225","37","1.7","2188","98.3","511","4","0.8","507","99.2","10","2","20","3","0","0","","","","","","","","","","","","","","","","","12","0","","2395","38","","2021-22"
+"Adani Ports and Special Economic Zone Limited","Ports & Logistics","2594","69","3","2525","97","458","4","1","454","99","10","1","10","3","0","0","","","","","","","","","","","","","","","","","13","0","","1444","12","","2022-23"
+"Adani Ports and Special Economic Zone Limited","Ports & Logistics","2919","84","3","2835","97","394","1","0.3","393","100","11","2","18","5","0","0","32.5","14.65","0.451","390","","","10.94","8.95","0.818","6.63","3.67","0.553","","","","","16","23","","","","","2023-24"
+"Adani Ports and Special Economic Zone Limited","Ports & Logistics","2882","78","2.71","2804","97","42372","1963","5","40409","95","6","2","33.3","4","0","0","33.3","42.6","1.279","709.96","0","0","16.90","15.20","0.899","7.33","7.95","1.085","32383.08","","","","16","21","","10745","178","","2024-25"
+"Adani Power Limited","Power","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","2021-22"
+"Adani Power Limited","Power","3313","19","0.6","3294","99.4","246","0","0","246","100","6","1","16.7","4","0","0","0","0","0","493","0","0","11","6","0.545","0","0","0","","","","","7.01","5.26","","2770","14","","2022-23"
+"Adani Power Limited","Power","3315","41","1.2","3274","98.8","13044","9","0.1","13035","99.9","6","1","16.7","4","0","0","0","0","0","537","0","0","12","7","0.583","4","3","0.75","","","","","9.72","6.15","","3120","37","","2023-24"
+"Adani Power Limited","Power","4210","102","2.42","4108","98","15133","15","0.1","15118","99.9","10","1","10","3","1","33.33","0","0","0","325.00","0","0","13.00","8.00","0.615","8.00","4.00","0.5","58905.83","","","","7.39","4.90","","2002","29","","2024-25"
+"Ajanta Pharma Limited","Pharmaceuticals","7321","551","8","6770","92","2261","119","5","2142","95","8","1","12","4","0","0","3642.30","6.21","0.002","218.77","0","0","4.11","5.03","1.224","6.98","0","0","","","","","22","20","","56","14","","2021-22"
+"Ajanta Pharma Limited","Pharmaceuticals","7640","562","7","7078","93","2630","108","4","2522","96","8","1","12","4","0","0","503.60","7.49","0.015","125.57","0","0","4.35","5.55","1.276","7.44","0","0","","","","","27","21","","6248","408","","2022-23"
+"Ajanta Pharma Limited","Pharmaceuticals","8085","707","8.74","7378","91.26","2283","109","4.77","2174","95.23","8","1","12.5","4","0","0","2159.82","0","0","1172.00","0","0","4.71","6.14","1.304","9.25","0","0","","","","","23","18","","6809","308","","2023-24"
+"Ajanta Pharma Limited","Pharmaceuticals","9636","586","6.00","9050","94","2601","204","8","2397","92","7","1","14.28","5","0","0","651.00","5.00","0.008","200.00","0","0","5.00","4.95","0.99","2.55","2.62","1.027","4648","","","","18","19","","9628","585","","2024-25"
+"Antony Waste Handling Cell Limited","Waste Management","1114","41","3.68","1073","96.32","7497","481","6.42","6842","91.26","6","1","16.67","2","1","50","60.74","0","0","74.72","14.69","0.197","2.51","2.51","1.000","2.51","2.51","1.000","","","","","28","21","","5462","516","","2021-22"
+"Antony Waste Handling Cell Limited","Waste Management","1218","50","4","1168","96","8597","413","4.8","8184","95.2","6","1","16.67","2","1","50","66.21","0","0","81.44","16.01","0.197","2.82","2.59","0.918","2.82","2.59","0.918","","","","","9.95","8.79","","28","0","","2022-23"
+"Antony Waste Handling Cell Limited","Waste Management","1033","39","4","994","96","9220","200","2","9020","98","6","1","16.67","2","1","50","72.34","0","0","101.24","18.48","0.183","3.30","3.52","1.067","2.97","3.29","1.108","","","","","12.36","25","","67","6","","2023-24"
+"Antony Waste Handling Cell Limited","Waste Management","1146","57","5","1089","95.03","9620","217","2","9403","98","6","1","17","2","1","50","79.56","0","0","111.35","20.24","0.182","3.44","3.55","1.032","6.52","6.41","0.983","53.00","","","","","","","2344","96","","2024-25"
+"Anupam Rasayan India Limited","Chemicals","672","36","5.36","636","94.64","1272","0","0","1272","100","8","2","25","6","1","16","131.40","131.40","1.000","87.54","22.79","0.260","4.87","2.99","0.614","2.07","0","0","","","","","6.40","5.56","","1473","30","","2021-22"
+"Anupam Rasayan India Limited","Chemicals","846","44","5.20","802","94.80","2179","16","0.73","2163","99.27","16","4","25","9","0","0","216","216","1.000","74.25","0","0","5.22","3.09","0.592","2.53","0","0","","","","","7.30","7.23","","632","39","","2022-23"
+"Anupam Rasayan India Limited","Chemicals","1003","55","5.48","948","94.52","2279","10","0.44","2269","99.56","8","2","25","7","0","0","315.60","500","1.584","13.20","0","0","4.97","3.37","0.678","2.70","0","0","","","","","6.60","4.04","","883","53","","2023-24"
+"Anupam Rasayan India Limited","Chemicals","881","0","0","881","100","","","","","","8","2","25","0","0","0","NA","NA","NA","NA","NA","NA","NA","NA","NA","","","","","","","","","","","723","43","","2024-25"
+"Cipla Limited","Pharmaceuticals","25589","3368","13.16","22220","86.79","334","90","26.95","244","73.05","11","2","18.18","4","1","25","74","71","0.959","390.75","0","0","4.53","5.85","1.291","20.62","25.57","1.240","","","","","","","","","","","2021-22"
+"Cipla Limited","Pharmaceuticals","26305","3728","14.17","22577","85.83","306","80","26.14","226","73.86","12","2","16.67","4","1","25","73.5","435.32","5.924","407.94","0","0","6.13","7.41","1.209","6.41","6.45","1.006","","","","","","","","","","","2022-23"
+"Cipla Limited","Pharmaceuticals","27331","4111","15.04","23220","84.96","385","114","29.61","271","70.39","11","2","18.18","4","1","25","107.75","553.02","5.132","422.26","0","0","6.38","6.69","1.049","8.57","10.43","1.217","","","","","","","","","","","2023-24"
+"Cipla Limited","Pharmaceuticals","29944","4704","15.71","25240","84.29","366","106","28.96","260","71.04","11","2","18.18","3","0","0","108.5","49.90","0.460","494.26","0","0","6.80","6.37","0.937","13.31","14.35","1.078","","","","","","","","","","","2024-25"
+"Coal India Limited","Mining","15694","1256","8","14438","92","237291","18362","7.7","218929","92.3","11","1","9.09","3","0","0","","","","","","","","","","","","","","","",""
+"Coal India Limited","Mining","16305","1222","7","15083","93","325624"
+"Coal India Limited","Mining","15777","1211","8","14566","92","213084","18210","9","194874","91","84","6","7.14","36","1","2.78","77.57","66.88","63.75","44.51","22.67","21.95","16.47","14.14","7.8","7.8","6.3","6.3","","","","","","","","","","","2023-24"
+"Coal India Limited","Mining","15138","1217","8","13921","92","205134","18792","9","186342","91","85","6","7.05","30","1","3.33","","","","","","","","","","","","","","","","","","","","","","","2024-25"
+"CSB Bank Limited","Banking","4663","1369","29.35","3294","70.65","","","","","","10","2","20","3","0","0","271.36","","38.98","","2.83","2.40","","","17.11","17.11","","","","","","","","","","4261","1099","","2021-22"
+"CSB Bank Limited","Banking","6830","2150","31.48","4680","68.52","","","","","","8","2","25","3","0","0","4.40","6.70","81.17","","2.32","1.54","","","49.90","49.90","","","","","","","","","","","","","2022-23"
+"CSB Bank Limited","Banking","7863","2474","31.46","5389","68.54","","","","","","11","3","27.27","4","0","0","","16.20","109.90","","2.74","2.08","","","47.0","47.0","","","","","","","","","","","","","2023-24"
+"CSB Bank Limited","Banking","7616","2375","31.18","5241","68.82","","","","","","10","2","20","4","0","0","","8.90","144.24","","3.70","2.56","","","46.70","46.70","","","","","","","","","","","","","2024-25"
+"Dalmia Bharat Sugar and Industries Limited","Sugar & Alcohol","444","3","0.7","441","99.3","2648","11","0.4","2637","99.6","6","1","17","4","1","25","355.15","16.20","118.66","10.68","8.00","8.42","3.17","3.10","11.1","11.1","4","4","","","","","","","","","","2021-22",""
+"Dalmia Bharat Sugar and Industries Limited","Sugar & Alcohol","549","13","2.4","536","97.6","2930","50","1.7","2880","98.3","6","1","17","2","1","50","17.00","15.00","130.47","11.68","6.02","5.29","3.10","3.49","6.7","6.7","2.1","2.1","","","","","","","","","","2022-23",""
+"Dalmia Bharat Sugar and Industries Limited","Sugar & Alcohol","524","11","2.1","513","97.9","3019","23","0.8","2996","99.2","6","1","17","2","1","50","20.00","19.00","129.60","15.00","7.75","4.72","3.43","3.78","13.8","13.8","3.2","3.2","","","","","","","","","","2023-24",""
+"Dalmia Bharat Sugar and Industries Limited","Sugar & Alcohol","537","10","1.9","527","98.1","3122","34","1.1","3088","98.9","7","1","14","2","1","50","19.00","16.00","133.83","14.81","7.84","5.47","3.59","3.26","14.9","14.9","3.6","3.6","","","","","","","","","","2024-25",""
+"Dilip Buildcon Limited","Construction","16790","28","0.17","16762","99.83","5948","1","0.02","5947","99.98","8","1","12.5","4","0","0","6.00","5.80","588.59","","2.64","4.88","1.64","1.39","40.57","40.57","60.77","60.77","","","","","","","7","0","","2021-22",""
+"Dilip Buildcon Limited","Construction","12639","29","0.23","12610","99.77","4167","1","0.02","4166","99.98","8","1","12.5","4","0","0","13.10","13.10","599.25","","2.58","5.20","2.16","1.42","50.64","50.64","69.30","69.30","","","","","","","","","","2022-23",""
+"Dilip Buildcon Limited","Construction","19081","35","0.18","19046","99.82","5341","3","0.06","5338","99.94","8","1","12.5","4","0","0","6.75","5.25","964.30","","2.64","5.60","1.63","1.50","51.41","51.41","80.69","80.69","","","","","","","","","","2023-24",""
+"Dilip Buildcon Limited","Construction","18209","38","0.2","18171","99.8","3954","1","0.03","3953","99.97","6","1","17","4","0","0","8.75","7.00","984.43","","2.52","6.05","1.50","1.74","50.74","50.74","86.18","86.18","","","","","","","","","","2024-25",""
+"Dr. Lal Path Labs Ltd.","Healthcare/Diagnostics","1409","303","21.5","1106","78.5","2832","664","23.45","2168","76.55","10","3","30","6","1","17","342.12","213.44","175.00","","6.11","15.60","3.62","3.45","24.53","24.53","13.21","13.21","","","","","","","3437","770","","2021-22",""
+"Dr. Lal Path Labs Ltd.","Healthcare/Diagnostics","1429","328","22.95","1101","77.04","2762","649","23.49","2113","76.5","12","3","25","6","1","17","366.07","228.38","187.25","","6.30","16.86","3.90","3.69","30.81","30.81","11.24","11.24","","","","","","","","","","2022-23",""
+"Dr. Lal Path Labs Ltd.","Healthcare/Diagnostics","1464","353","24.11","1111","75.89","2784","650","23.35","2134","76.65","10","3","30","6","1","17","390.78","243.79","218.53","","7.00","17.88","4.05","3.81","20.62","20.62","10.07","10.07","","","","","","","","","","2023-24",""
+"Dr. Lal Path Labs Ltd.","Healthcare/Diagnostics","1830","482","26.34","1348","73.66","3478","977","28.09","2501","71.91","10","3","30","6","1","17","418.13","260.86","300.00","","7.51","18.09","4.20","3.74","15.86","15.86","8.21","8.21","","","","","","","","","","2024-25",""
+"Dynamatic Technologies Limited","Aerospace & Hydraulics","438","54","12.33","384","87.67","1228","30","2.44","1198","97.5","9","1","11.11","5","0","0","19","2","428.18","5.78","4.27","6.47","7.61","","","","","","","17.57","1.84","","","","","","2021-22","",""
+"Dynamatic Technologies Limited","Aerospace & Hydraulics","474","53","11.18","421","88.82","1048","6","0.57","1042","99.43","9","1","11.11","5","0","0","37.5","4.5","96.11","5.83","4.52","6.74","7.90","","","","","","","45","24","","","","","","2022-23","",""
+"Dynamatic Technologies Limited","Aerospace & Hydraulics","440","46","10.45","394","89.55","1063","16","1.51","1047","98.49","8","1","12.5","4","0","0","37.5","4.5","85.93","6.63","3.25","7.20","8.36","","","","","","","26","31","","","","","","2023-24","",""
+"Dynamatic Technologies Limited","Aerospace & Hydraulics","577","58","10.05","519","89.95","1113","26","2.34","1087","97.66","8","1","12.5","3","0","0","51","16","342","7.32","3.43","7.62","8.96","","","","","","","11","3","","","","","","2024-25","",""
+"Eicher Motors Limited","Automotive/Motorcycles","13080","990","8","12087","92","18","0","0","18","100","6","1","17","1","0","0","","","","","","","","","","","","","","","","","","","","","","2021-22",""
+"Eicher Motors Limited","Automotive/Motorcycles","16456","1345","8","15111","92","7","0","0","7","100","6","1","17","4","1","25","","","","","","","","","","","","","","","","","","","","","","2022-23",""
+"Eicher Motors Limited","Automotive/Motorcycles","16550","1774","11","14776","89","4","0","0","4","100","8","1","12.5","4","1","25","","","","","","","","","","","","","","","","","","","","","","2023-24",""
+"Eicher Motors Limited","Automotive/Motorcycles","3390","347","10","3043","90","15905","3102","20","12803","80","8","1","12.5","3","1","33.33","28","28","1007","14","10","8","8","","","","","","","10.28","0.89","","","","","","2024-25","",""
+"Electrosteel Castings Limited","Steel Castings & Pipes","1319","19","1.45","1300","98.55","12273","1","0","12272","100","18","4","22.22","6","3","50","17.40","15.75","38.44","20.94","5.11","4.76","3.24","","","","","","","16.72","4.36","","","","","","2021-22","",""
+"Electrosteel Castings Limited","Steel Castings & Pipes","1435","23","1.60","1412","98.40","10362","124","1.20","10238","98.80","18","4","22.22","10","3","30","16.20","98.63","238.34","155.17","5.74","5.46","3.57","","","","","","","13.62","4.29","","","","","","2022-23","",""
+"Electrosteel Castings Limited","Steel Castings & Pipes","1593","27","2","1566","98","10440","43","0.5","10397","99.5","18","4","22","10","3","30","18.40","104.06","41.93","0","5.50","6.00","3.70","","","","","","","6","3","","","","","","2023-24","",""
+"Electrosteel Castings Limited","Steel Castings & Pipes","1754","46","3","1708","97","12570","93","1","12477","99","18","5","27.78","10","3","30","16.30","47.12","44.28","0","6.08","5.11","3.84","","","","","","","11","3","","","","","","2024-25","",""
+"Engineers India Limited","Engineering Consultancy","2756","324","11.76","2432","88.24","","","","","","12","2","16.67","5","1","20","57.94","60.71","33.89","0","22.80","22.33","0","0","","","","","3.97","","","","","","","2021-22","","",""
+"Engineers India Limited","Engineering Consultancy","2661","310","11.65","2351","88.35","","","","","","13","2","15.38","1","0","0","35.00","66.57","37.47","0","25.06","24.49","0","0","","","","","3.87","","","","","","","2022-23","","",""
+"Engineers India Limited","Engineering Consultancy","2661","309","11.61","2352","88.39","","","","","","12","2","16.67","1","0","0","63.37","73.91","39.81","0","26.77","25.96","0","0","","","","","5.08","","","","","","","2023-24","","",""
+"Engineers India Limited","Engineering Consultancy","2653","317","11.95","2336","88.05","","","","","","9","2","22.22","1","0","0","54.90","76.67","44.16","0","29.90","28.66","0","0","","","","","4.79","","","","","","","2024-25","","",""
+"Fineotex Chemical Limited","Specialty Chemicals","110","21","19.09","89","80.91","88","9","10.23","79","89.77","7","2","28.57","3","1","33.33","95.40","43.40","6.07","","4.78","3.99","2.13","2.62","","","","","","","","","","","183","31","","2021-22",""
+"Fineotex Chemical Limited","Specialty Chemicals","197","34","17.26","163","82.74","77","8","10.39","69","89.61","7","2","28.57","3","1","33.33","113.40","65.40","4.16","","3.83","3.89","4.18","4.00","","","","","","","","","","","","","","2022-23",""
+"Fineotex Chemical Limited","Specialty Chemicals","201","39","19.40","162","80.60","69","1","1.45","68","98.55","7","2","28.57","4","1","25.00","119.40","71.40","7.45","","4.56","4.70","3.76","3.76","","","","","","","","","","","","","","2023-24",""
+"Fineotex Chemical Limited","Specialty Chemicals","108","30","27.78","78","72.22","98","8","8.16","90","91.84","7","2","28.57","3","1","33.33","119.40","94.14","11.85","","8.67","5.74","4.16","4.01","2.68","4.00","1.02","0.00","","","","","","","","","","2024-25",""
+"GHCL Limited","Inorganic Chemicals","1001","78","7.79","923","92.21","4113","1890","45.94","2223","54.06","10","1","10","3","0","0","78.60","44.70","456.14","","6.20","3.34","1.88","1.12","6.10","10.20","13.10","46.50","","","","","","","690","29","","2021-22",""
+"GHCL Limited","Inorganic Chemicals","731","61","8.34","670","91.66","3102","1979","63.80","1123","36.20","10","1","10","3","0","0","97.20","52.60","887.34","","6.85","3.50","2.24","1.22","8.80","18.00","14.20","38.80","","","","","","","","","","2022-23",""
+"GHCL Limited","Inorganic Chemicals","474","28","5.91","446","94.09","501","14","2.79","487","97.21","10","1","10","3","0","0","43.40","42.70","788.48","","9.14","6.93","3.27","1.94","8.00","21.40","3.40","14.20","","","","","","","","","","2023-24",""
+"GHCL Limited","Inorganic Chemicals","495","30","6.06","465","93.94","517","16","3.09","501","96.91","8","1","12.5","3","0","0","103.60","41.10","784.88","","8.77","7.32","3.69","2.42","5.66","13.79","2.43","6.67","","","","","","","","","","2024-25",""
+"GMM Pfaudler Limited","Special Purpose Machinery Manufacturing","567","36","6","531","94","263","0","0","263","100","8","1","12.5","5","1","20","1008","11","127","38","7","9","4","","15","19","","","","","","","","","565","14","","2021-22",""
+"GMM Pfaudler Limited","Special Purpose Machinery Manufacturing","699","37","5.29","662","94.71","2132","7","0.33","2125","99.67","8","1","12.50","4","1","25","986","10","214","43","7","9","4","","20.51","30.30","","","","","","","","","","","","2022-23",""
+"GMM Pfaudler Limited","Special Purpose Machinery Manufacturing","598","30","5.02","568","94.98","2234","17","0.76","2217","99.24","6","1","16.67","4","1","25","25","24","282.89","55.75","7.75","10.08","5.57","3.73","21.01","17.54","","","","","","","","","","","","2023-24",""
+"GMM Pfaudler Limited","Special Purpose Machinery Manufacturing","579","32","5.53","547","94.47","2091","9","0.43","2082","99.57","8","2","25","4","1","25","24.63","21.25","300","77.15","8.28","10.88","5.36","","28.16","19.67","11.89","","","","","","","","","","","2024-25",""
+"HCL Technologies Limited","IT & Business Services","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","129862","","","2021-22"
+"HCL Technologies Limited","IT & Business Services","241352","69914","28.96","171096","70.9","","","","","","13","4","30.76","3","0","0","","","","","","","","","","","","","","","","","19.50","","","","","","2022-23"
+"HCL Technologies Limited","IT & Business Services","237248","68506","28.88","168419","70.99","","","","","","","","","","","","","","","","","","","","","","","","","","","","12.42","","","","","","2023-24"
+"HCL Technologies Limited","IT & Business Services","234496","67217","28.66","167074","71.25","","","","","","10","5","50","3","0","0","109","96","4608","","18.18","9.53","","","13.06","12.81","","","","","","","","","","","","2024-25",""
+"Healthcare Global Enterprises Limited","Medical & Healthcare","6772","3309","48.9","3463","51.1","","","","","","10","2","20","4","1","25","6.25","42.50","6.800","132.25","49.99","0.378","2.64","2.16","0.818","","","","","","","","43","","","","","","2021-22"
+"Healthcare Global Enterprises Limited","Medical & Healthcare","7425","3618","48.7","3807","51.3","","","","","","10","2","20","2","1","50","9.50","45.50","4.789","132.25","52.99","0.401","2.76","2.40","0.870","","","","","","","","38","","","","","","2022-23"
+"Healthcare Global Enterprises Limited","Medical & Healthcare","7590","3622","48","3968","52","","","","","","10","2","20","2","2","100","20.00","73.41","3.671","93.23","73.03","0.783","3.01","2.62","0.870","","","","","","","","32","33","","","","","2023-24"
+"Healthcare Global Enterprises Limited","Medical & Healthcare","6736","3357","50","3379","50","","","","","","8","2","25","2","2","100","20.00","84.55","4.228","323.80","86.57","0.267","3.24","2.76","0.852","","","","","","","","31","31","","","","","2024-25"
+"Hindustan Aeronautics Limited","Aerospace & Defense","25412","2204","8.67","23208","91.32","17629","1420","8.05","16209","91.94","","","","5","0","0","60.41","1.65","0.027","60.28","","","14.73","14.66","0.995","10.76","10.66","0.991","","","","","0.24","0.06","","","","","2021-22"
+"Hindustan Aeronautics Limited","Aerospace & Defense","24457","2157","8.81","22300","91.19","16907","1402","8.29","15505","91.71","7","2","28.57","4","0","0","48.29","","","33.19","","","16.24","15.47","0.953","12.76","11.42","0.895","","","","","0.28","0.05","","","","","2022-23"
+"Hindustan Aeronautics Limited","Aerospace & Defense","23766","2158","9.08","21608","90.92","16300","1391","8.53","14909","91.47","8","1","12.5","5","0","0","57.01","","","56.82","","","17.55","17.36","0.989","13.25","12.40","0.936","","","","","0.26","0.05","","","","","2023-24"
+"Hindustan Aeronautics Limited","Aerospace & Defense","23999","2200","9.17","21799","90.83","16609","1438","8.66","15171","91.34","6","1","16.67","4","0","0","59.06","","","56.86","","","19.30","18.93","0.981","13.77","13.05","0.948","","","","","0.25","0.04","","","","","2024-25"
+"Hindustan Zinc Limited","Mining & Metals","3500","412","12","3088","88","19414","186","1","19228","99","8","4","50","3","0","0","","","","","","","14.81","","","","","","","","","","18","26","","","","","2021-22"
+"Hindustan Zinc Limited","Mining & Metals","2575","501","19.5","2074","80.5","20621","252","1.2","20369","98.8","9","4","44.44","3","0","0","947.50","","","194.80","","","14.70","9.60","0.653","22.50","16.90","0.751","","","","","17","19","","","","","2022-23"
+"Hindustan Zinc Limited","Mining & Metals","2805","608","21.68","2197","78.32","20991","294","1.40","20681","98.52","9","5","55.56","3","1","33.33","1271.51","","","245.60","","","15.58","9.76","0.626","23.82","17.76","0.746","","","","","15","17","","","","","2023-24"
+"Hindustan Zinc Limited","Mining & Metals","2854","728","25.51","2124","74.42","22677","307","1.35","22349","98.55","9","3","33.33","3","1","33.33","1364.98","","","462.18","","","14.73","10.58","0.718","29.08","22.23","0.764","","","","","18","15","","","","","2024-25"
+"Hitachi Energy India Limited","Power Grid Equipment","1744","166","10","1578","90","1222","28","2","1194","98","6","2","33.3","3","0","0","42.80","","","150.83","","","12.69","10.05","0.792","11.22","23.43","2.089","","","","","9.4","13.8","","","","","2021-22"
+"Hitachi Energy India Limited","Power Grid Equipment","1829","171","9","1658","91","1110","35","3","1075","97","6","2","33","3","0","0","278.26","45.85","0.165","133.53","","","9.69","7.54","0.778","10.61","8.56","0.807","","","","","12.2","21.02","","","","","2022-23"
+"Hitachi Energy India Limited","Power Grid Equipment","1874","196","10","1678","90","1097","44","4","1053","96","6","2","33.33","3","0","0","235.06","30.97","0.132","236.83","","","11.08","7.30","0.659","10.94","10.37","0.948","","","","","11.24","19.64","","","","","2023-24"
+"Hitachi Energy India Limited","Power Grid Equipment","2013","238","12","1775","88","1144","77","6.7","1067","93","6","2","33.33","3","0","0","381.16","40.03","0.105","236.92","","","12.92","12.67","0.981","11.03","12.63","1.145","","","","","6.99","11.08","","","","","2024-25"
+"Indraprastha Gas Limited","City Gas Distribution","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","2021-22",""
+"Indraprastha Gas Limited","City Gas Distribution","687","39","5.67","648","94.32","11501","33","0.28","11468","99.71","10","1","10","2","0","0","","","","81.57","","","18.26","17.82","0.976","","","","","","","","4.44","0.12","","","","","2022-23"
+"Indraprastha Gas Limited","City Gas Distribution","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","2023-24",""
+"Indraprastha Gas Limited","City Gas Distribution","720","41","5.69","679","94.31","11109","111","0.99","10998","99","10","3","30","3","0","0","","","","96.85","","","23.61","22.20","0.940","","","","","","","","1.81","0.00","","","","","2024-25"
+"Jaiprakash Associates Limited","Diversified Infrastructure","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","2280","58","","2021-22",""
+"Jaiprakash Associates Limited","Diversified Infrastructure","8047","220","2.73","7827","97.27","15000","4000","26.67","11000","73.33","12","1","8.33","4","0","0","10.45","7.80","0.746","125.24","","","3.22","2.81","0.873","1.09","0.90","0.819","","","","","5","2","","","","","2022-23"
+"Jaiprakash Associates Limited","Diversified Infrastructure","7103","237","3.34","6866","96.66","12035","139","1.15","11896","98.85","11","1","9.09","5","0","0","158.62","","","26.07","","","4.06","3.73","0.919","","","","","","","","6","17","","","","","2023-24"
+"Jaiprakash Associates Limited","Diversified Infrastructure","7150","290","4.06","6860","95.94","8615","100","1.16","8515","98.84","9","0","0","5","0","0","172.16","","","48.84","","","4.09","3.72","0.908","","","","","","","","6","5","","","","","2024-25"
+"Jaiprakash Power Ventures Limited","Power Generation","1280","15","1.2","1265","98.8","2542","58","2.28","2484","97.72","12","2","16.66","4","0","0","3.20","5.20","1.625","119.11","","","3.18","2.73","0.858","1.29","0.93","0.721","","","","","11.22","0.10","1239","6","","","2021-22"
+"Jaiprakash Power Ventures Limited","Power Generation","1618","12","0.74","1606","99.26","1503","47","3.13","1456","96.87","12","2","16.66","4","0","0","3.20","5.20","1.625","119.11","","","3.18","2.73","0.858","1.29","0.93","0.721","","","","","5.07","","","","","","2022-23"
+"Jaiprakash Power Ventures Limited","Power Generation","1468","15","1.02","1453","98.98","1615","57","3.53","1558","96.47","12","2","16.67","4","0","0","3.80","5.00","1.316","178.20","","","4.77","2.12","0.444","1.78","1.41","0.792","","","","","6.47","","","","","","2023-24"
+"Jaiprakash Power Ventures Limited","Power Generation","1647","20","1.21","1627","98.79","2385","58","2.43","2327","97.57","10","2","20","5","0","0","12.60","12.05","0.956","212.50","","","3.71","2.52","0.679","2.61","3.24","1.241","","","","","7.00","","","","","","2024-25"
+"Life Insurance Corporation Of India","Life Insurance","104046","24094","23.16","79952","76.84","","","","","","15","2","13.33","8","1","12.5","","","","","","","","","","","","","","","","","5.74","4.60","","102515","","","2021-22"
+"Life Insurance Corporation Of India","Life Insurance","98477","23159","23.52","75318","76.48","","","","","","14","2","14","8","0","0","","","","","","","","","","","","","","","","","5.50","3.97","","","","","2022-23"
+"Life Insurance Corporation Of India","Life Insurance","98667","23251","23.57","75416","76.43","","","","","","15","1","6.67","9","1","11.1","","","","","","","","","","","","","","","","","6.54","5.67","","","","","2023-24"
+"Life Insurance Corporation Of India","Life Insurance","91620","21867","23.87","69753","76.13","","","","","","14","1","7.14","13","1","7.69","96.62","","","49.58","46.14","0.931","20.54","22.33","1.087","","","","","","","","8.25","7.14","","","","","2024-25"
+"Mastek Limited","Information Technology","1430","549","38.39","881","61.61","47","4","8.51","43","91.49","6","1","16.67","2","0","0","","","","10.85","","","8.29","6.64","0.801","","","","","","","","26.3","26.1","1010","400","","","2021-22"
+"Mastek Limited","Information Technology","1397","531","38.01","866","61.99","55","5","9.09","50","90.91","5","1","20","2","0","0","","","","","","","8.29","6.64","0.801","","","","","","","","21.9","19.4","","","","","2022-23"
+"Mastek Limited","Information Technology","1342","482","35.91","860","64.09","53","6","11.32","47","88.68","6","1","16.67","3","0","0","33.00","12.00","0.364","47.65","","","15.92","","","","","","","","","","21.9","19.4","","","","","2023-24"
+"Mastek Limited","IT Services","5058","1416","28","3642","72","","","","","","6","1","16.7","","","","","","","","","","","","","","","","","","","","","","","6","1","16.7","2024-25"
+"Motherson Sumi Wiring India Limited","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","2021-22"
+"Motherson Sumi Wiring India Limited","Automotive Components Manufacturing","3091","470","15.21","2621","84.79","40611","19405","47.79","21206","52.21","10","1","10","3","1","33.33","15.32","","","30.82","8.07","0.262","4.93","4.07","0.826","1.74","1.74","1.000","","","","","11","14","","","","","2022-23"
+"Motherson Sumi Wiring India Limited","Automotive Components Manufacturing","3418","501","14.66","2917","85.34","42963","22025","51.26","20938","48.74","10","1","10","3","1","33.33","18.12","","","9.77","9.07","0.928","5.05","4.25","0.841","1.73","1.73","1.000","","","","","9","11","","","","","2023-24"
+"Motherson Sumi Wiring India Limited","Automotive Components Manufacturing","4305","577","13.40","3728","86.60","49327","23175","46.98","26152","53.02","10","2","20","3","1","33.33","20.88","","","14.91","9.64","0.647","5.33","4.17","0.783","1.79","1.79","1.000","","","","","10","7","","","","","2024-25"
+"Nahar Capital and Financial Services Limited","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","2021-22"
+"Nahar Capital and Financial Services Limited","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","2022-23"
+"Nahar Capital and Financial Services Limited","Financial Services","20","2","10","18","90","","","","","","10","1","10","2","1","50","0.40","0.40","1.000","28.48","8.59","0.302","4.17","24.00","5.755","","","","","","","","16.66","0","","","","","2023-24"
+"Nahar Capital and Financial Services Limited","Financial Services","20","2","10","18","90","","","","","","10","1","10","2","1","50","0.40","0.40","1.000","30.25","9.47","0.313","4.51","28.80","6.386","","","","","","","","","","","","","","2024-25"
+"Natco Pharma Limited","Pharmaceuticals","4247","452","10.64","3795","89.36","513","94","18.33","419","81.67","9","1","11.11","20","0","0","","","","85.50","","","4.61","3.05","0.661","6.27","6.51","1.039","","","","","17.84","1.71","1837","182","","","2021-22"
+"Natco Pharma Limited","Pharmaceuticals","3946","413","10.46","3533","89.54","545","52","9.54","493","90.46","10","1","10","2","0","0","192.00","","","75.05","","","5.06","3.26","0.644","6.24","5.35","0.858","","","","","16.2","1.8","","","","","2022-23"
+"Natco Pharma Limited","Pharmaceuticals","3762","390","10.37","3372","89.63","1000","127","12.7","873","87.3","10","1","10","2","0","0","336.95","","","79.82","","","6.30","4.10","0.651","5.27","4.70","0.891","","","","","15.66","1.87","","","","","2023-24"
+"Natco Pharma Limited","Pharmaceuticals","4073","430","10.56","3643","89.44","882","115","13.04","767","86.96","9","1","11.11","2","0","0","689.40","","","81.74","","","7.01","4.58","0.653","7.04","6.23","0.885","","","","","17.38","16.44","","","","","2024-25"
+"National Fertilizers Limited","Fertilizers","1538","103","6.70","1435","93.30","1465","99","6.76","1366","93.24","8","2","25","28","2","7.14","43.10","","","28.20","","","15.36","13.91","0.906","12.32","7.30","0.592","","","","","10.69","0.25","2283","149","","","2021-22"
+"National Fertilizers Limited","Fertilizers","1454","99","6.81","1355","93.19","1510","98","6.49","1412","93.51","11","3","27.27","26","2","7.69","42.91","","","23.15","","","16.15","14.88","0.921","12.65","6.69","0.529","","","","","10.44","0.33","","","","","2022-23"
+"National Fertilizers Limited","Fertilizers","1362","100","7.34","1262","92.66","1377","92","6.68","1285","93.32","10","3","30","24","2","8.33","49.19","","","27.06","","","12.86","18.01","1.400","13.42","5.32","0.397","","","","","23.42","10.05","","","","","2023-24"
+"National Fertilizers Limited","Fertilizers","1277","100","7.83","1177","92.17","1234","84","6.81","1150","93.19","9","3","33.33","26","0","0","54.20","","","27.26","","","17.35","Nil","","13.15","Nil","","","","","","16.64","5.00","","","","","2024-25"
+"NLC India Limited","Power Generation and Mining","4053","376","9.28","3677","90.72","22794","1427","6.26","21367","93.74","11","1","9.09","6","0","0","2.34","","","1.82","","","1.07","1.06","0.992","0.68","0.68","1.005","","","","","1.46","1.51","1644","71","","","2021-22"
+"NLC India Limited","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","2022-23"
+"NLC India Limited","Power Generation and Mining","3681","343","9.32","3338","90.68","22788","1438","6.31","21350","93.69","11","3","27.27","1","0","0","2.53","","","2.23","","","1.57","0.99","0.628","1.17","0.73","0.622","","","","","2.41","0.64","","","","","2023-24"
+"NLC India Limited","Power Generation and Mining","3684","316","8.58","3368","91.42","32229","1891","5.87","30338","94.13","10","1","10","1","0","0","50.97","","","50.11","","","19.22","20.30","1.056","14.03","15.53","1.107","","","","","12.15","8.44","","","","","2024-25"
+"Oil India Limited","Oil and Gas Exploration and Production","1739","209","12","1530","88","4789","243","5","4546","95","11","1","9.09","1","0","0","68.61","50.01","","","","","","","","","3.22","4.44","","","","","","","","2842","270","","2021-22"
+"Oil India Limited","Oil and Gas Exploration and Production","1825","224","12.27","1601","87.72","5103","303","5.94","4800","94.06","10","2","20","1","0","0","54.79","63.77","34.88","26.53","0.761","15.75","14.18","0.900","","","3.99","4.32","","","","","","","","","","","2022-23"
+"Oil India Limited","Oil and Gas Exploration and Production","1902","251","13.20","1651","86.80","4875","280","5.74","4595","94.26","7","1","14.29","1","0","0","9.84","76.59","36.41","28.12","0.772","16.47","14.37","0.872","","","4.23","2.72","","","","","","","","","","","2023-24"
+"Oil India Limited","Oil and Gas Exploration and Production","1938","248","12.80","1690","87.20","4774","295","6.18","4479","93.82","8","1","12.50","2","0","0","37.73","55.78","31.24","26.06","0.834","15.68","13.01","0.830","","","3.75","3.03","","","","","","","","","","","2024-25"
+"OnMobile Global Limited","Mobile Entertainment Services","642","113","18","529","82","0","0","0","0","0","7","1","14","4","0","0","16.50","124.28","9.88","6.38","0.646","","","","","","33","38","","","","","","","","382","50","","2021-22"
+"OnMobile Global Limited","Mobile Entertainment Services","684","127","19","557","81","0","0","0","0","0","8","1","12.5","2","0","0","16.50","124.28","11.93","7.52","0.630","","","","","","21","21","","","","","","","","","","","2022-23"
+"OnMobile Global Limited","Mobile Entertainment Services","512","92","18","420","82","0","0","0","0","0","5","1","20","2","0","0","29.00","128.05","28.74","24.96","0.868","","","","","","31.69","36","","","","","","","","","","","2023-24"
+"OnMobile Global Limited","Mobile Entertainment Services","397","75","19","322","81","0","0","0","0","0","6","2","33.33","3","1","33.33","22.14","50.54","14.84","13.39","0.902","","","","","","33","41","","","","","","","","","","","2024-25"
+"Quick Heal Technologies Limited","Cybersecurity","1070","199","18.59","871","81.40","0","0","0","0","0","8","1","12.5","3","0","0","42.96","102.90","","","","","","","","","29.46","","","","","","","","","","","","2021-22"
+"Quick Heal Technologies Limited","Cybersecurity","1103","200","18.13","903","81.86","0","0","0","0","0","7","1","14.28","4","0","0","12.00","157.50","9.39","9.00","0.959","","","","","","27.60","","","","","","","","","","","","2022-23"
+"Quick Heal Technologies Limited","Cybersecurity","1043","198","18.98","845","81.02","0","0","0","0","0","7","1","14.28","5","0","0","12.00","157.50","11.00","10.00","0.909","","","","","","18.07","","","","","","","","","","","","2023-24"
+"Quick Heal Technologies Limited","Cybersecurity","1059","199","18.79","860","81.21","0","0","0","0","0","7","1","14.28","6","0","0","7.75","156.95","8.59","8.43","0.981","","","","","","14.63","15.64","","","","","","","","","","","2024-25"
+"REC Limited","Power and Infrastructure Financing","442","72","16.29","370","83.71","0","0","0","0","0","7","2","28.57","3","0","0","85.31","85.88","28.65","28.84","1.007","","","","","","15.25","7.00","","","","","","","","","","","2021-22"
+"REC Limited","Power and Infrastructure Financing","419","64","15.27","355","84.73","0","0","0","0","0","9","2","22.22","4","0","0","89.97","79.86","27.43","28.60","1.043","","","","","","11.18","1.86","","","","","","","","","","","2022-23"
+"REC Limited","Power and Infrastructure Financing","980","147","15","833","85","0","0","0","0","0","8","1","12.5","3","0","0","66.05","91.94","27.27","28.61","1.049","","","","","","6.03","4.23","","","","","","","","","","","2023-24"
+"REC Limited","Power and Infrastructure Financing","1153","157","13.62","996","86.38","0","0","0","0","0","6","1","16.66","5","1","20","102.08","93.76","25.67","28.16","1.097","","","","","","6.08","6.21","","","","","","","","","","","2024-25"
+"RITES Limited","Transport Infrastructure Consultancy","2646","214","8.09","2432","91.91","0","0","0","0","0","10","1","10","5","0","0","63.20","","","60.23","","","19.18","19.18","1.000","","","","","","","","7.40","5.69","","","","","2021-22"
+"RITES Limited","Transport Infrastructure Consultancy","2422","207","8.55","2215","91.45","0","0","0","0","0","10","1","10","5","0","0","72.64","","","69.40","","","20.44","20.44","1.000","","","","","","","","8.97","6.43","","","","","2022-23"
+"RITES Limited","Transport Infrastructure Consultancy","2604","226","8.68","2378","91.32","0","0","0","0","0","10","1","10","5","0","0","70.81","","","70.33","","","22.26","22.26","1.000","","","","","","","","8.04","5.99","","","","","2023-24"
+"RITES Limited","Transport Infrastructure Consultancy","2714","228","8.40","2486","91.60","0","0","0","0","0","6","0","0","5","0","0","78.55","","","74.17","","","24.73","20.17","0.816","","","","","","","","9.59","11.60","","","","","2024-25"
+"ROUTE MOBILE LIMITED","Cloud Communications Platform","407","77","18.92","330","81.08","0","0","0","0","0","7","1","14","2","0","0","","","","51.02","","","6.07","5.88","0.968","","","","","","","","19","7.89","","","","","2021-22"
+"ROUTE MOBILE LIMITED","Cloud Communications Platform","410","92","22.44","318","77.56","0","0","0","0","0","7","1","14.29","2","0","0","","","","57.14","","","6.50","5.04","0.775","","","","","","","","31","6","","","","","2022-23"
+"ROUTE MOBILE LIMITED","Cloud Communications Platform","492","111","22.56","381","77.44","0","0","0","0","0","7","1","14.29","2","0","0","150.00","","","67.63","","","6.01","5.64","0.938","","","","","","","","19.96","4.46","","","","","2023-24"
+"ROUTE MOBILE LIMITED","Cloud Communications Platform","520","110","21.15","410","78.85","0","0","0","0","0","6","1","16.67","4","0","0","16.67","","","179.85","","","6.82","6.55","0.960","","","","","","","","9","2.89","","","","","2024-25"
+"Shalby Limited","Healthcare - Hospitals","3826","1711","44.72","2115","55.28","0","0","0","0","0","7","1","14","2","0","0","1.38","1.50","1.091","24.90","","","1.76","1.20","0.682","","","","","","","","59.2","28.6","","","","","2021-22"
+"Shalby Limited","Healthcare - Hospitals","4005","1705","42.57","2300","57.43","0","0","0","0","0","8","1","12.50","2","0","0","1.05","1.30","1.238","45.40","","","2.00","1.47","0.736","","","","","","","","58.7","28.9","","","","","2022-23"
+"Shalby Limited","Healthcare - Hospitals","3493","1582","45.29","1911","54.71","0","0","0","0","0","7","1","14.29","2","0","0","1.45","1.75","1.207","47.31","","","1.85","1.72","0.927","","","","","","","","34.90","17.20","","","","","2023-24"
+"Shalby Limited","Healthcare - Hospitals","2802","1242","44.33","1560","55.67","0","0","0","0","0","7","1","14.29","2","0","0","1.20","1.35","1.125","54.81","","","2.24","1.82","0.813","","","","","","","","35.45","20.34","","","","","2024-25"
+"Star Health and Allied Insurance Company Limited","Health Insurance","14034","3837","27","10197","73","0","0","0","0","0","12","2","16.67","14","1","7.14","","","","148.85","14.90","0.100","5.14","4.13","0.804","","","","","","","","11.88","11.46","","","","","2021-22"
+"Star Health and Allied Insurance Company Limited","Health Insurance","14750","4017","27","10733","73","0","0","0","0","0","12","2","16.67","15","1","6.67","","","","96.00","19.20","0.200","3.60","3.26","0.904","","","","","","","","34.21","32.18","","","","","2022-23"
+"Star Health and Allied Insurance Company Limited","Health Insurance","15913","4494","28","11419","72","0","0","0","0","0","9","2","22.22","13","1","7.69","","","","215.66","32.27","0.150","5.57","4.20","0.753","","","","","","","","31.94","30.48","","","","","2023-24"
+"Star Health and Allied Insurance Company Limited","Health Insurance","15816","4508","29","11308","71","0","0","0","0","0","9","2","22","5","2","40","","","","313.63","38.90","0.124","6.17","4.91","0.796","","","","","","","","38.43","","","","","","2024-25"
+"Sun Pharmaceutical Industries Limited","Pharmaceuticals","15983","1264","7.91","6127","185","3.02","8","1","12.5","2","0","0","14719","5942","70","48","0.686","298.63","7.53","7.00","0.930","3.33","5.56","1.671","10.4","10.0","15.7","","","","","","","","","","","2021-22",""
+"Sun Pharmaceutical Industries Limited","Pharmaceuticals","15515","1472","9.49","9252","716","7.73","7","1","14.28","2","0","0","14043","8536","80.5","48","0.596","277.04","8.05","7.50","0.932","3.54","4.47","1.265","13.2","13.2","13.9","6.1","6.2","2.2","","","","","","","","2022-23",""
+"Sun Pharmaceutical Industries Limited","Pharmaceuticals","15999","1893","11.83","9895","775","7.83","9","1","11.11","2","0","0","14106","9120","81.5","51","0.626","299.38","8.59","6.92","0.806","3.83","2.28","0.594","13.59","13.90","11.29","","","","","","","","","","","2023-24",""
+"Sun Pharmaceutical Industries Limited","Pharmaceuticals","16023","2142","13.37","9851","895","9.09","8","1","13","2","0","0","13881","8956","98","68","0.694","325.99","9.45","7.26","0.769","4.17","2.56","0.614","13.90","14.09","12.64","","","","","","","","","","","2024-25",""
+"Teamlease Services Limited","Human Resources and Staffing Services","2143","787","36.7","0","0","0","9","2","22.2","2","2","100","1356","0","150","","","81.80","4.54","3.56","0.784","","","","49","48","51","","","","","","","","","","","2021-22",""
+"Teamlease Services Limited","Human Resources and Staffing Services","2259","800","35.41","0","0","0","17","6","35","2","2","100","1459","0","150","207.50","1.383","95.27","5.15","4.00","0.777","","","","55","55","54","","","","","","","","","","","2022-23",""
+"Teamlease Services Limited","Human Resources and Staffing Services","2354","868","36.87","0","0","0","10","3","30","2","2","100","1486","0","130","131","1.008","102","5","4","0.80","","","","45","46","43","","","","","","","","","","","2023-24",""
+"Teamlease Services Limited","Human Resources and Staffing Services","2466","919","37.27","0","0","0","10","3","30","2","2","100","1547","0","141","131","0.929","113","5","4","0.80","","","","45","44","45","","","","","","","","","","","2024-25",""
 
-            'dr_reddys_management_data.txt': `===== DR. REDDY'S LABORATORIES =====
+"The Andhra Sugars Limited","Sugar & Chemicals","2035","3","0.15","2032","99.85","675","0","0","675","100","10","","","","","","","","","","","","","","","","","","1217.29","","161.70","","","","","","","","2021-22"
+"The Andhra Sugars Limited","Sugar & Chemicals","676","3","0.44","673","99.56","2056","0","0","2056","100","10","1","10","2","0","0","","","","","","","0.46833","0.68388","1.460","0.22863","","","","","","","7.27","","","","","","2022-23"
+"The Andhra Sugars Limited","Sugar & Chemicals","673","3","0.44","670","99.56","2025","0","0","2025","100","10","2","20","2","0","0","","","","","","","0.50363","0.80925","1.607","0.26376","","","","","","","4.75","","","","","","2023-24"
+"The Andhra Sugars Limited","Sugar & Chemicals","651","2","0.31","649","99.69","1885","0","0","1885","100","10","1","10","2","0","0","","","","","","","0.56506","0.75257","1.332","0.29114","","","","","","","6.60","","","","","","2024-25"
+"Thejo Engineering Limited","Manufacturing - Rubber & Conveyor Systems","502","26","5.18","476","94.82","1554","9","0.58","1545","99.42","11","1","9.09","5","0","0","23.70","6.00","0.253","42.12","","","3.60","3.78","1.050","2.34","1.45","0.620","276.61","","","","16.63","17.39","","","","","2021-22"
+"Thejo Engineering Limited","Manufacturing - Rubber & Conveyor Systems","617","27","4.38","590","95.62","1544","6","0.39","1538","99.61","11","1","9.09","5","0","0","23.93","6.25","0.261","45.60","","","3.93","4.38","1.115","2.66","1.50","0.564","","","","","16.51","0","","","","","2022-23"
+"Thejo Engineering Limited","Manufacturing - Rubber & Conveyor Systems","620","20","3.23","600","96.77","1675","9","0.54","1666","99.46","13","1","7.69","4","0","0","22.96","6.50","0.283","46.89","","","4.14","4.64","1.121","2.92","1.55","0.531","","","","","12.70","15.79","","","","","2023-24"
+"Thejo Engineering Limited","Manufacturing - Rubber & Conveyor Systems","661","22","3.33","639","96.67","1651","7","0.42","1644","99.58","12","2","16.67","4","0","0","26.44","12.75","0.482","56.01","","","4.67","5.01","1.073","3.12","1.76","0.564","","","","","15.06","15.79","","","","","2024-25"
+"Torrent Pharmaceuticals Limited","Pharmaceuticals","12310","1122","9","11188","91","2408","288","12","2120","88","7","2","29","4","0","0","46.50","42.00","0.903","407.32","","","4.89378","3.66984","0.750","4.12608","4.10208","0.995","","","","","12.0","24.4","","","","","2021-22"
+"Torrent Pharmaceuticals Limited","Pharmaceuticals","12991","1139","9","11852","91","2512","362","14","2150","86","10","2","20","5","0","0","89.00","74.00","0.831","588.68","","","5.19996","3.74400","0.720","4.12608","4.09608","0.993","","","","","12.2","25.2","","","","","2022-23"
+"Torrent Pharmaceuticals Limited","Pharmaceuticals","14351","1183","8","13168","92","2920","457","16","2463","84","11","2","18","5","0","0","65.00","58.00","0.892","543.47","","","5.36628","3.97704","0.741","5.18208","5.15208","0.994","","","","","","","","","","","2023-24"
+"Torrent Pharmaceuticals Limited","Pharmaceuticals","15563","1288","8","14275","92","3226","469","15","2757","85","8","2","25","4","0","0","68.00","65.50","0.963","563.48","","","5.63592","4.26000","0.756","5.18208","5.14608","0.993","","","","","","","","","","","2024-25"
+"Vakrangee Limited","Digital Financial Services","347","75","21.61","272","78.39","0","0","0","0","0","9","1","11.11","2","0","0","149.25","","","20.87","","","3.372","3.609","1.071","","","","","","","","76.75","66.67","","","","","2021-22"
+"Vakrangee Limited","Digital Financial Services","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","2022-23"
+"Vakrangee Limited","Digital Financial Services","217","25","11.52","192","88.48","0","0","0","0","0","9","1","11.11","2","0","0","203.75","","","22.07","","","3.749","3.837","1.024","","","","","","","","23.48","","","","","","2023-24"
+"Vakrangee Limited","Digital Financial Services","230","31","13.48","199","86.52","0","0","0","0","0","6","2","33.33","3","0","0","1.75","2.50","1.429","18.96","","","2.94","2.68","0.912","","","","","","","","33","","","","","","2024-25"
+"Welspun Corp Limited","Steel Pipes Manufacturing","1452","99","6.8","1353","93.2","2079","27","1.3","2052","98.7","8","3","38","3","0","0","","","","184.58","","","6.0662","4.7157","0.777","2.68518","2.16","0.804","","","","","23","24","","","","","2021-22"
+"Welspun Corp Limited","Steel Pipes Manufacturing","927","50","5","877","95","1680","38","2","1642","98","8","3","38","3","0","0","","","","190.81","","","5.7246","3.31018","0.578","2.93404","2.34767","0.800","","","","","16","41","","","","","2022-23"
+"Welspun Corp Limited","Steel Pipes Manufacturing","1252","88","7","1164","93","1532","22","1.4","1510","98.6","8","2","25","3","0","0","","","","204.42","","","6.1121","3.80","0.622","3.34691","2.54588","0.761","","","","","20","2","","","","","2023-24"
+"Welspun Corp Limited","Steel Pipes Manufacturing","1257","120","10","1137","90","3018","70","2","2948","98","10","1","10","3","0","0","1652","40","0.024","215.17","","","7.66799","4.86","0.634","3.89748","2.52","0.646","","","","","23","20","","","","","2024-25"
+"Wipro Limited","Information Technology Services","","","","","","0","0","0","0","0","9","2","22.22","4","0","0","","","","","","","","","","","","","","","","","22.9","21.5","","","","","2021-22"
+"Wipro Limited","Information Technology Services","262325","93939","35.81","168368","64.19","0","0","0","0","0","9","3","33.33","4","0","0","","","","","","","","","","","","","","","","","20.4","20.2","","","","","2022-23"
+"Wipro Limited","Information Technology Services","235930","84963","36.01","150967","63.98","0","0","0","0","0","9","2","22.22","4","1","25","","","","","","","","","","","","","","","","","13.95","12.83","","","","","2023-24"
+"Wipro Limited","Information Technology Services","235415","86062","36.56","149353","63.43","0","0","0","0","0","9","2","22.22","4","1","25","","","","","","","","","","","","","","","","","15.38","13.52","","","","","2024-25"
+`;
 
-BOARD OF DIRECTORS:
+// ============================================================
+// PARSE CSV
+// ============================================================
+function parseCSV(text) {
+  const rows = [];
+  let currentRow = [];
+  let cur = '';
+  let inQ = false;
+  
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1); // Handle BOM
 
-1. K Satish Reddy - Chairman
-2. G V Prasad - Co-Chairman and Managing Director
-3. Penny Wan - Independent Director
-4. Arun M Kumar - Independent Director
-5. Leo Puri - Independent Director
-6. Shikha Sharma - Independent Director
-7. Dr. Claudio Albrecht - Independent Director
-8. Dr. Alpna Seth - Independent Director
-9. Dr. K P Krishnan - Independent Director
-10. Sanjiv Mehta - Independent Director
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    const next = text[i+1];
 
-MANAGEMENT COUNCIL:
+    if (c === '"') {
+      if (inQ && next === '"') {
+        cur += '"'; // Escaped quote "" -> "
+        i++; 
+      } else {
+        inQ = !inQ; // Toggle quote state
+      }
+    } else if (c === ',' && !inQ) {
+      currentRow.push(cur);
+      cur = '';
+    } else if ((c === '\r' || c === '\n') && !inQ) {
+      if (c === '\r' && next === '\n') i++; 
+      currentRow.push(cur);
+      rows.push(currentRow);
+      cur = '';
+      currentRow = [];
+    } else {
+      cur += c;
+    }
+  }
 
-1. K Satish Reddy - Chairman
-2. G V Prasad - Co-Chairman and Managing Director
-3. Erez Israeli - Chief Executive Officer
-4. M V Narasimham - Chief Financial Officer
-5. Archana Bhaskar - Chief Human Resource Officer
-6. Deepak Sapra - Chief Executive Officer, API and Services
-7. Dr. Jayanth Sridhar - Global Head of Biologics
-8. Krishna Venkatesh - Global Head of Quality & Pharmacovigilance
-9. M V Ramana - Chief Executive Officer, Branded Markets
-10. Phanimitra B - Chief Digital and Information Officer
-11. Milan Kalawadia - Chief Executive Officer, North America
-12. Patrick Aghanian - Chief Executive Officer, Europe Generics
-13. Sanjay Sharma - Head Global Operations
-14. Sushrut Kulkarni - Global Head – Integrated Product Development Organisation`,
+  if (cur.length > 0 || currentRow.length > 0) {
+    currentRow.push(cur);
+    rows.push(currentRow);
+  }
 
-            'tcs_management_data.txt': `===== TATA CONSULTANCY SERVICES (TCS) =====
+  const headers = rows[0].map(h => h.trim());
+  
+  // Find "Year" column index
+  // Note: CSV header might have "Year", "Year ", or " Year"
+  const yearIdx = headers.findIndex(h => h.trim() === 'Year');
 
-BOARD OF DIRECTORS:
-
-1. N Chandrasekaran - Chairman
-2. Dr Pradeep Kumar Khosla - Independent Director
-3. Hanne Sorensen - Independent Director
-4. Keki Mistry - Independent Director
-5. K Krithivasan - CEO & MD
-6. Aarthi Subramanian - Executive Director - President & COO
-7. Al-Noor Ramji - Executive Director
-8. Sanjay V Bhandarkar - Executive Director
-
-MANAGEMENT TEAM:
-
-- K Krithivasan - Chief Executive Officer and Managing Director
-- Aarthi Subramanian - President and Chief Operating Officer
-- Samir Seksaria - Chief Financial Officer
-- Milind Lakkad - Chief Human Resources Officer
-- Mangesh Sathe - Chief Strategy Officer
-- Dr. Harrick Vin - Chief Technology Officer
-- Abhinav Kumar - Chief Marketing Officer
-- Susheel Vasudevan - Banking Financial Services and Insurance
-- Shankar Narayanan - Banking Financial Services and Insurance
-- Debashis Ghosh - Life Sciences, Healthcare, Energy
-- Krishnan Ramanujam - Consumer Business Group
-- Anupam Singhal - Manufacturing
-- V Rajanna - Technology, Software and Services
-- Amit Bajaj - North America
-- Amit Kapur - UK & Ireland
-- Sapthagiri Chapalapalli - Europe
-- Girish Ramachandran - Growth Markets`,
-
-            'icici_management_data.txt': `===== ICICI BANK LIMITED =====
-
-BOARD MEMBERS:
-
-1. Pradeep Kumar Sinha - Non-Executive Chairman
-2. Neelam Dhawan - Independent Director - Audit Committee (Chairperson)
-3. Radhakrishnan Nair - Independent Director
-4. B. Sriram - Independent Director
-5. S. Madhavan - Independent Director
-6. Vibha Paul Rishi - Independent Director - Stakeholders Relationship Committee (Chairperson)
-7. Rohit Bhasin - Independent Director - Risk Committee (Chairperson)
-8. Punit Sood - Independent Director
-9. Sandeep Bakhshi - Managing Director & CEO
-10. Sandeep Batra - Executive Director
-11. Rakesh Jha - Executive Director
-12. Ajay Kumar Gupta - Executive Director
-
-KEY PERSONNEL:
-
-- Anindya Banerjee - Group Chief Financial Officer
-- Prachiti Lalingkar - Company Secretary`,
-
-            'reliance_management_data.txt': `===== RELIANCE INDUSTRIES LIMITED =====
-
-BOARD OF DIRECTORS:
-
-1. Mukesh D. Ambani - Chairman and Managing Director
-2. Isha M. Ambani - Non-Executive Director
-3. Akash M. Ambani - Non-Executive Director
-4. Anant M. Ambani - Non-Executive Director
-5. Nikhil R. Meswani - Executive Director
-6. Hital R. Meswani - Executive Director - Environmental, Social and Governance Committee (Chairman)
-7. P.M.S. Prasad - Executive Director
-8. Raminder Singh Gujral - Independent Director - Audit Committee (Chairman), Risk Management Committee (Chairman)
-9. Dr. Shumeet Banerji - Independent Director - Human Resources Committee (Chairman), Corporate Social Responsibility Committee (Chairman)
-10. Arundhati Bhattacharya - Independent Director
-11. K. V. Chowdary - Independent Director
-12. Adil Zainulbhai - Independent Director
-13. Yasir Othman H. Al-Rumayyan - Independent Director
-14. K. Sethuraman - Independent Director`,
-
-            'sbi_management_data.txt': `===== STATE BANK OF INDIA =====
-
-BOARD OF DIRECTORS:
-
-1. Shri Challa Sreenivasulu Setty - Chairman
-2. Shri Ashwini Kumar Tewari - Managing Director (Corporate Banking)
-3. Shri Vinay M. Tonse - Managing Director (Retail Business & Operations)
-4. Shri Rana Ashutosh Kumar Singh - Managing Director (Risk, Compliance)
-5. Shri Rama Mohan Rao Amara - Managing Director (International Banking)
-6. CA. Ketan S. Vikamsey - Independent Director
-7. Shri Mrugank M. Paranjape - Independent Director
-8. Shri Rajesh Kumar Dubey - Independent Director
-9. CA. Dharmendra Singh Shekhawat - Independent Director
-10. Smt. Swati Gupta - Non-Executive Director
-11. Shri Nagaraju Maddirala - Non-Executive Director (Government Nominee)
-12. Shri Ajay Kumar - Non-Executive Director (RBI Nominee)
-
-SENIOR MANAGEMENT:
-
-1. Shri Ashok Kumar Sharma - DMD & CCO
-2. Shri Baldev Prakash - DMD & Group Chief Risk Officer
-3. Shri Binod Kumar Mishra - DMD (HR) & CDO
-4. Ms Jayati Bansal - DMD (International Banking Group)
-5. Shri Kshitij Mohan - DMD SARG
-6. Smt. Saloni Narayan - DMD (Stressed Assets Management)
-7. Smt. Ruma Dey - DMD (Credit Monitoring Group)`,
-
-            'infosys_management_data.txt': `===== INFOSYS LIMITED =====
-
-BOARD OF DIRECTORS:
-
-1. Nandan M. Nilekani - Chairman (Non-Independent)
-2. Salil Parekh - CEO and Managing Director
-3. D. Sundaram - Lead Independent Director
-4. Michael Gibbs - Independent Director
-5. Bobby Parikh - Independent Director
-6. Chitra Nayak - Independent Director
-7. Govind Iyer - Independent Director
-8. Helene Auriol Potier - Independent Director
-9. Nitin Paranjpe - Independent Director
-
-LEADERSHIP TEAM:
-
-- Salil Parekh - Chief Executive Officer
-- Jayesh Sanghrajka - Chief Financial Officer
-- Shaji Mathew - Chief Human Resources Officer
-- Sumit Virmani - Chief Marketing Officer
-- Mohammed Rafee Tarafdar - Chief Technology Officer
-- Dennis Kantiah Gada - Segment Head Banking and Financial Services
-- Anand Swaminathan - Segment Head Communication, Media and Technology
-- Jasmeet Singh - Segment Head Manufacturing
-- Ashiss Kumar Dash - Segment Head Energy, Utilities, Resources
-- Karmesh Gul Vaswani - Segment Head CPG, Logistics and Retail`,
-
-            'hcltech_management_data.txt': `===== HCL TECHNOLOGIES =====
-
-FOUNDER:
-
-1. Shiv Nadar - Founder, Chairman Emeritus
-
-BOARD OF DIRECTORS:
-
-1. Roshni Nadar Malhotra - Chairperson
-2. C Vijayakumar - CEO & Managing Director
-3. Shikhar Malhotra - Non-Executive Director
-4. Bhavani Balasubramanian - Independent Director
-5. Deepak Kapoor - Independent Director
-6. Lee Fang Chew - Independent Director
-7. Nishi Vasudeva - Independent Director
-8. Simon John - Independent Director
-9. Thomas Sieber - Independent Director
-10. Vanitha Narayanan - Independent Director
-
-LEADERSHIP TEAM:
-
-- C Vijayakumar - CEO & Managing Director
-- Shiv Walia - Chief Financial Officer
-- Ramachandran Sundararajan - Chief People Officer
-- Raghu Raman Lakshmanan - General Counsel
-- Jill Kouri - Chief Marketing Officer
-- Vijay Guntur - Chief Technology Officer
-- Rajiv Shesh - Chief Revenue Officer, HCLSoftware
-- Kevin McGee - Chief Risk Officer`,
-
-            'hdfc_securities_management_data.txt': `===== HDFC SECURITIES =====
-
-BOARD OF DIRECTORS:
-
-1. Mr. Neeraj Swaroop - Independent Director and Chairperson
-2. Mr. Dhiraj Relli - Managing Director & CEO
-3. Mrs. Vijay Laxmi Joshi - Independent Director
-4. Mr. Samir Bhatia - Independent Director
-5. Mr. Tarun Balram - Independent Director
-6. Mr. Arvind Vohra - Non-Executive Director (HDFC Bank Nominee)
-7. Mr. Ashish Rathi - Whole Time Director and COO
-8. Mr. Bhavesh Zaveri - Non-Executive Director (HDFC Bank Nominee)
-
-MANAGEMENT TEAM:
-
-- Dhiraj Relli - Managing Director & CEO
-- Ashish Rathi - Chief Operating Officer
-- Anand Mathur - Chief Financial Officer
-- Kunal Sanghavi - Chief Strategy Officer
-- Puneeth Bekal - Chief Marketing Officer
-- Neetika Bhatia - Chief Human Resources Officer
-- Amit Sharma - Chief Business Officer
-- Mufaddal Matcheswala - Chief Business Officer`,
-
-            'ongc_management_data.txt': `===== OIL AND NATURAL GAS CORPORATION (ONGC) =====
-
-BOARD OF DIRECTORS:
-
-1. Omkar Nath Gyani - Chairman
-2. Raminder Singh Sawhney - Director
-3. Chandrakant Raghunath Borikar - Director & CFO
-4. Nisha Dhingra - Director & Company Secretary`,
-
-            'indian_oil_management_data.txt': `===== INDIAN OIL CORPORATION =====
-
-BOARD OF DIRECTORS:
-
-1. Shri A S Sahney - Chairman
-2. Suman Kumar - Director (Planning and Business Development)
-3. Arvind Kumar - Director (Refineries)
-4. Rashmi Govil - Director (Human Resources)
-5. N Senthil Kumar - Director (Pipelines)
-6. V Satish Kumar - Director (Marketing)
-7. Alok Sharma - Director (Research and Development)
-8. Atul Jain - Director (Finance)`
-        };
-
-        // Modal functions
-        function viewDetails(filename, companyName) {
-            const modal = document.getElementById('dataModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalBody = document.getElementById('modalBody');
-            
-            modal.style.display = 'block';
-            modalTitle.textContent = companyName + ' - Detailed Leadership Data';
-            modalBody.innerHTML = '<div class="loading">Loading data...</div>';
-            
-            // Use hardcoded data
-            const data = companyData[filename];
-            if (data) {
-                modalBody.innerHTML = formatTextData(data);
-            } else {
-                modalBody.innerHTML = '<div class="error-message">⚠️ Error: Data not found for ' + companyName + '</div>';
-            }
+  return rows.slice(1).map(vals => {
+    // 1. Detect where the Year value is
+    const yearPattern = /^['"]?20\d{2}-\d{2}['"]?$/;
+    let foundIdx = -1;
+    
+    // Check expected position first
+    if (yearIdx !== -1 && vals[yearIdx] && vals[yearIdx].match(yearPattern)) {
+      foundIdx = yearIdx;
+    } else {
+      // Search from the end backwards (optimization)
+      for (let i = vals.length - 1; i >= 0; i--) {
+        if (vals[i] && vals[i].match(yearPattern)) {
+          foundIdx = i;
+          break;
         }
+      }
+    }
 
-        function closeModal() {
-            document.getElementById('dataModal').style.display = 'none';
-        }
+    // 2. Realign row if needed
+    if (foundIdx !== -1 && yearIdx !== -1 && foundIdx !== yearIdx) {
+      if (foundIdx > yearIdx) {
+        // Shift data left: Remove extra columns (usually empty/corrupt fields) that shifted the Year right
+        // We splice out (foundIdx - yearIdx) elements BEFORE the found year index.
+        const numToRemove = foundIdx - yearIdx;
+        // Typically the garbage is immediately preceding the Year value in these malformed rows
+        vals.splice(foundIdx - numToRemove, numToRemove);
+      } else {
+         // Shift data right: Insert missing columns to align Year
+         const numToInsert = yearIdx - foundIdx;
+         // We insert empty strings before the found year to push it right
+         const filler = new Array(numToInsert).fill("");
+         vals.splice(foundIdx, 0, ...filler);
+      }
+    }
 
-        // Close modal when clicking outside of it
-        window.onclick = function(event) {
-            const modal = document.getElementById('dataModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
+    const obj = {};
+    headers.forEach((h, idx) => {
+       // Strip quotes if they somehow remained (though our regex parser handles them)
+       let v = (vals[idx] || '').trim();
+       if (v.startsWith('"') && v.endsWith('"')) v = v.slice(1,-1);
+       obj[h] = v;
+    });
+    return obj;
+  });
+}
 
-        function formatTextData(text) {
-            let html = '';
-            const lines = text.split('\n');
-            let currentSection = '';
-            let inSection = false;
-            
-            for (let line of lines) {
-                line = line.trim();
-                if (!line) continue;
-                
-                // Check if it's a section header
-                if (line.includes('===') || line.includes('---')) {
-                    continue;
-                }
-                
-                // Major section headers
-                if (line.match(/^(BOARD OF DIRECTORS|MANAGEMENT COUNCIL|MANAGEMENT TEAM|COMMITTEES|KEY PERSONNEL|SENIOR MANAGEMENT|LEADERSHIP TEAM|BOARD MEMBERS|EXECUTIVE DIRECTORS)/i)) {
-                    if (currentSection) {
-                        html += '</div>';
-                    }
-                    currentSection = line;
-                    html += '<div class="data-section"><h3>' + line + '</h3>';
-                    inSection = true;
-                    continue;
-                }
-                
-                // Person entry (starts with number or bullet)
-                if (line.match(/^\d+\./) || line.match(/^[•●◦-]\s/)) {
-                    const personData = parsePerson(line);
-                    html += formatPersonCard(personData);
-                } else if (inSection) {
-                    // Additional info or other content
-                    html += '<p class="person-role">' + line + '</p>';
-                }
-            }
-            
-            if (currentSection) {
-                html += '</div>';
-            }
-            
-            return html || '<p>No data available</p>';
-        }
+function n(v) { const x = parseFloat(v); return isNaN(x) ? null : x; }
 
-        function parsePerson(line) {
-            // Remove numbering/bullets
-            line = line.replace(/^\d+\.\s*/, '').replace(/^[•●◦-]\s*/, '');
-            
-            // Extract name and role
-            let name = '', role = '', gender = '';
-            
-            // Check for clear female indicators first
-            if (line.match(/\b(Ms\.|Mrs\.|Miss|Smt\.)\s/i)) {
-                gender = 'female';
-            } 
-            // Check for clear male indicators
-            else if (line.match(/\b(Mr\.|Shri)\s/i)) {
-                gender = 'male';
-            }
-            // For Dr. and Prof., check the name for gender clues
-            else if (line.match(/\b(Dr\.|Prof\.|Col\.|Capt\.|Cmde\.)\s/i)) {
-                // Common female name patterns (Indian and Western)
-                if (line.match(/\b(Sunaina|Nisha|Rashmi|Vibha|Neelam|Punita|Samina|Isha|Arundhati|Nilima|Shikha|Alpna|Penny|Archana|Chitra|Helene|Roshni|Bhavani|Nishi|Vanitha|Jill|Jayati|Saloni|Ruma|Neetika|Richa|Priyanka|Swati|Prachiti|Vijay Laxmi)\b/i)) {
-                    gender = 'female';
-                } else {
-                    gender = 'male';
-                }
-            }
-            
-            // Split by common delimiters
-            if (line.includes(' - ')) {
-                [name, role] = line.split(' - ', 2);
-            } else if (line.includes(', ')) {
-                [name, role] = line.split(', ', 2);
-            } else if (line.includes('(') && line.includes(')')) {
-                const match = line.match(/^(.+?)\s*\((.+?)\)/);
-                if (match) {
-                    name = match[1];
-                    role = match[2];
-                } else {
-                    name = line;
-                }
-            } else {
-                name = line;
-            }
-            
-            return { name: name.trim(), role: role.trim(), gender: gender };
-        }
+// Filter out invalid rows (missing Company, Year, or corrupted numeric Company names)
+let DATA = parseCSV(RAW_CSV).filter(r => 
+  r.Company && 
+  r.Company.length > 2 && 
+  /[a-zA-Z]/.test(r.Company) && 
+  r.Year && 
+  r.Year.match(/^20\d{2}-\d{2}$/)
+);
 
-        function formatPersonCard(person) {
-            let roleHtml = person.role ? '<div class="person-role">💼 ' + person.role + '</div>' : '';
-            
-            return '<div class="person-card">' +
-                '<div class="person-name">' + person.name + '</div>' +
-                roleHtml +
-                '</div>';
-        }
+const YEARS = ['2021-22','2022-23','2023-24','2024-25'];
+let COMPANIES = [...new Set(DATA.map(r => r.Company))].sort();
+let SECTORS = [...new Set(DATA.map(r => r.Sector).filter(Boolean))].sort();
 
-    </script>
-    <script>
-        // Calculate totals
-        const companies = [
-            { name: 'Cipla', men: 22, women: 3 },
-            { name: "Divi's Lab", men: 8, women: 2 },
-            { name: "Dr. Reddy's", men: 20, women: 4 },
-            { name: 'TCS', men: 23, women: 2 },
-            { name: 'ICICI Bank', men: 11, women: 3 },
-            { name: 'Reliance', men: 12, women: 2 },
-            { name: 'SBI', men: 15, women: 4 },
-            { name: 'Infosys', men: 17, women: 2 },
-            { name: 'HCLTech', men: 13, women: 5 },
-            { name: 'HDFC Securities', men: 14, women: 2 },
-            { name: 'ONGC', men: 3, women: 1 },
-            { name: 'Indian Oil', men: 7, women: 1 }
-        ];
+// Map: company -> {year -> row}
+let MAP = {};
+COMPANIES.forEach(c => { MAP[c] = {}; });
+DATA.forEach(r => { if (MAP[r.Company]) MAP[r.Company][r.Year] = r; });
 
-        const totalMen = companies.reduce((sum, c) => sum + c.men, 0);
-        const totalWomen = companies.reduce((sum, c) => sum + c.women, 0);
-        const totalLeaders = totalMen + totalWomen;
-        const avgWomenPercent = ((totalWomen / totalLeaders) * 100).toFixed(1);
+// ============================================================
+// SIDEBAR
+// ============================================================
+function updateSectorDropdown() {
+  const secSel = document.getElementById('cmp-sector');
+  secSel.innerHTML = '<option value="ALL">All Sectors</option>';
+  SECTORS.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s;
+    o.textContent = s;
+    secSel.appendChild(o);
+  });
+}
+updateSectorDropdown();
 
-        document.getElementById('totalLeaders').textContent = totalLeaders;
-        document.getElementById('totalWomen').textContent = totalWomen;
-        document.getElementById('avgWomenPercent').textContent = avgWomenPercent + '%';
+document.getElementById('total-companies-badge').textContent = `${COMPANIES.length} companies`;
 
-        // Overview Chart
-        const ctxOverview = document.getElementById('overviewChart').getContext('2d');
-        new Chart(ctxOverview, {
-            type: 'doughnut',
-            data: {
-                labels: ['Men in Leadership', 'Women in Leadership'],
-                datasets: [{
-                    data: [totalMen, totalWomen],
-                    backgroundColor: [
-                        'rgba(79, 172, 254, 0.8)',
-                        'rgba(250, 112, 154, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgba(79, 172, 254, 1)',
-                        'rgba(250, 112, 154, 1)'
-                    ],
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            font: {
-                                size: 14
-                            },
-                            padding: 20
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'Overall Gender Distribution Across All Companies',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        },
-                        padding: 20
-                    }
-                }
-            }
-        });
+const listEl = document.getElementById('company-list');
+function buildList(filter='') {
+  listEl.innerHTML = '';
+  COMPANIES.filter(c => c.toLowerCase().includes(filter.toLowerCase())).forEach(c => {
+    // Find the first non-empty sector for this company
+    const startRow = DATA.find(r => r.Company===c && r.Sector);
+    const sector = startRow ? startRow.Sector : '';
+    
+    const li = document.createElement('li');
+    li.innerHTML = `${c}<br><span class="sector-tag">${sector}</span>`;
+    li.addEventListener('click', () => selectCompany(c, li));
+    listEl.appendChild(li);
+  });
+}
+buildList();
+document.getElementById('company-search').addEventListener('input', e => buildList(e.target.value));
 
-        // Comparison Chart
-        const ctxComparison = document.getElementById('comparisonChart').getContext('2d');
-        new Chart(ctxComparison, {
-            type: 'bar',
-            data: {
-                labels: companies.map(c => c.name),
-                datasets: [
-                    {
-                        label: 'Men',
-                        data: companies.map(c => c.men),
-                        backgroundColor: 'rgba(79, 172, 254, 0.8)',
-                        borderColor: 'rgba(79, 172, 254, 1)',
-                        borderWidth: 2
-                    },
-                    {
-                        label: 'Women',
-                        data: companies.map(c => c.women),
-                        backgroundColor: 'rgba(250, 112, 154, 0.8)',
-                        borderColor: 'rgba(250, 112, 154, 1)',
-                        borderWidth: 2
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            font: {
-                                size: 14
-                            },
-                            padding: 20
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'Company-wise Gender Distribution Comparison',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        },
-                        padding: 20
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Leaders',
-                            font: {
-                                size: 14
-                            }
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Companies',
-                            font: {
-                                size: 14
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    </script>
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'compare') { updateSectorDropdown(); renderCompare(); } 
+    if (btn.dataset.tab === 'heatmap') { updateSectorDropdown(); renderHeatmap(); }
+  });
+});
+
+// ============================================================
+// CHART HELPERS
+// ============================================================
+const CHART_DEFAULTS = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#8892b0', font: { size: 11 }, boxWidth: 12 } } },
+  scales: {
+    x: { ticks: { color: '#8892b0', font:{size:11} }, grid: { color: 'rgba(46,51,84,0.5)' } },
+    y: { ticks: { color: '#8892b0', font:{size:11} }, grid: { color: 'rgba(46,51,84,0.5)' } }
+  }
+};
+
+const chartInstances = {};
+function makeChart(id, type, data, options={}) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); }
+  const ctx = document.getElementById(id).getContext('2d');
+  chartInstances[id] = new Chart(ctx, {
+    type, data,
+    options: deepMerge(JSON.parse(JSON.stringify(CHART_DEFAULTS)), options)
+  });
+}
+function deepMerge(target, src) {
+  for (const k in src) {
+    if (src[k] && typeof src[k]==='object' && !Array.isArray(src[k])) {
+      if (!target[k]) target[k]={};
+      deepMerge(target[k], src[k]);
+    } else { target[k] = src[k]; }
+  }
+  return target;
+}
+
+// ============================================================
+// OVERVIEW
+// ============================================================
+let activeListItem = null;
+function selectCompany(name, li) {
+  if (activeListItem) activeListItem.classList.remove('active');
+  li.classList.add('active');
+  activeListItem = li;
+  renderOverview(name);
+}
+
+function fmt(v, decimals=1, suffix='') {
+  if (v===null||v===undefined||v==='') return '—';
+  return (+v).toFixed(decimals) + suffix;
+}
+
+function renderOverview(company) {
+  document.getElementById('overview-empty').style.display='none';
+  document.getElementById('overview-content').style.display='block';
+  document.getElementById('ov-company-name').textContent = company;
+  const sector = (DATA.find(r=>r.Company===company&&r.Sector)||{}).Sector||'';
+  document.getElementById('ov-sector-tag').textContent = sector;
+
+  const rows = YEARS.map(y => MAP[company][y] || {});
+
+  // --- KPIs (latest year with data) ---
+  const latest = [...rows].reverse().find(r => r.Employee_total || r['Female_employee_%']) || rows[3];
+  const first = rows.find(r => r['Female_employee_%']) || rows[0];
+
+  const latestFemEmp = n(latest['Female_employee_%']);
+  const firstFemEmp = n(first['Female_employee_%']);
+  const femDelta = (latestFemEmp!==null && firstFemEmp!==null) ? (latestFemEmp-firstFemEmp).toFixed(1) : null;
+
+  const latestBoard = n(latest['Board_women_%']);
+  const latestKMP = n(latest['KMP_women_%']);
+  const latestAttr = n(latest['Attrition_Rate_Total_%']);
+  const latestPayGap = n(latest['Pay_Gap_Employees']);
+  const latestEmpTotal = n(latest['Employee_total']);
+  const latestWrkTotal = n(latest['Workers_total']);
+
+  document.getElementById('ov-kpis').innerHTML = `
+    <div class="kpi-card">
+      <div class="label">Female Employees</div>
+      <div class="value" style="color:var(--accent2)">${latestFemEmp!==null?latestFemEmp.toFixed(1)+'%':'—'}</div>
+      <div class="sub">Latest year</div>
+      ${femDelta!==null?`<div class="trend ${+femDelta>0?'up':+femDelta<0?'down':'flat'}">${+femDelta>0?'▲':'▼'} ${Math.abs(femDelta)}pp vs 2021-22</div>`:''}
+    </div>
+    <div class="kpi-card">
+      <div class="label">Board Women</div>
+      <div class="value" style="color:var(--accent)">${latestBoard!==null?latestBoard.toFixed(1)+'%':'—'}</div>
+      <div class="sub">Latest year</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">KMP Women</div>
+      <div class="value" style="color:var(--accent4)">${latestKMP!==null?latestKMP.toFixed(1)+'%':'—'}</div>
+      <div class="sub">Latest year</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Emp Pay Gap</div>
+      <div class="value" style="color:${latestPayGap===null?'var(--muted)':latestPayGap>=0.95&&latestPayGap<=1.05?'var(--good)':latestPayGap<0.95?'var(--bad)':'var(--warn)'}">${latestPayGap!==null?latestPayGap.toFixed(3):'—'}</div>
+      <div class="sub">F/M ratio, 1.0=parity</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Attrition</div>
+      <div class="value" style="color:var(--bad)">${latestAttr!==null?latestAttr.toFixed(1)+'%':'—'}</div>
+      <div class="sub">Total latest year</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Employees</div>
+      <div class="value" style="font-size:1.1rem">${latestEmpTotal!==null?latestEmpTotal.toLocaleString('en-IN'):'—'}</div>
+      <div class="sub">Latest headcount</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Workers</div>
+      <div class="value" style="font-size:1.1rem">${latestWrkTotal!==null?(latestWrkTotal===0?'None':latestWrkTotal.toLocaleString('en-IN')):'—'}</div>
+      <div class="sub">Latest headcount</div>
+    </div>
+  `;
+
+  // --- Charts ---
+  makeChart('chart-emp-gender','line',{
+    labels: YEARS,
+    datasets: [{
+      label:'Female Employee %', data: YEARS.map(y=>n(MAP[company][y]?.['Female_employee_%'])),
+      borderColor:'#00d4aa', backgroundColor:'rgba(0,212,170,0.1)', fill:true, tension:0.35, pointRadius:5
+    }]
+  }, { scales:{y:{min:0, ticks:{callback:v=>v+'%'}}} });
+
+  makeChart('chart-board-gender','line',{
+    labels: YEARS,
+    datasets: [
+      { label:'Board Women %', data: YEARS.map(y=>n(MAP[company][y]?.['Board_women_%'])), borderColor:'#6c63ff', backgroundColor:'rgba(108,99,255,0.1)', fill:true, tension:0.35, pointRadius:5 },
+      { label:'KMP Women %', data: YEARS.map(y=>n(MAP[company][y]?.['KMP_women_%'])), borderColor:'#ffa94d', borderDash:[5,3], tension:0.35, pointRadius:5 }
+    ]
+  }, { scales:{y:{min:0, ticks:{callback:v=>v+'%'}}} });
+
+  const pgEmp = YEARS.map(y=>n(MAP[company][y]?.['Pay_Gap_Employees']));
+  makeChart('chart-paygap-emp','bar',{
+    labels: YEARS,
+    datasets: [{
+      label:'Pay Gap Ratio (F/M)', data: pgEmp,
+      backgroundColor: pgEmp.map(v=> v===null?'rgba(136,146,176,0.3)':v>=0.95&&v<=1.05?'rgba(0,212,170,0.6)':v<0.95?'rgba(255,107,157,0.6)':'rgba(255,169,77,0.6)'),
+      borderRadius: 6
+    }]
+  }, {
+    plugins:{ annotation:{} },
+    scales:{ y:{ ticks:{callback:v=>v.toFixed(2)}, suggestedMin:0, suggestedMax:1.5 } }
+  });
+
+  const pgWkr = YEARS.map(y=>n(MAP[company][y]?.['Pay_Gap_Workers']));
+  makeChart('chart-paygap-wkr','bar',{
+    labels: YEARS,
+    datasets: [{
+      label:'Pay Gap Ratio (F/M)', data: pgWkr,
+      backgroundColor: pgWkr.map(v=> v===null?'rgba(136,146,176,0.3)':v>=0.95&&v<=1.05?'rgba(0,212,170,0.6)':v<0.95?'rgba(255,107,157,0.6)':'rgba(255,169,77,0.6)'),
+      borderRadius: 6
+    }]
+  }, { scales:{ y:{ ticks:{callback:v=>v.toFixed(2)}, suggestedMin:0, suggestedMax:1.5 } } });
+
+  makeChart('chart-attrition','line',{
+    labels: YEARS,
+    datasets: [
+      { label:'Total Attrition %', data: YEARS.map(y=>n(MAP[company][y]?.['Attrition_Rate_Total_%'])), borderColor:'#ff6b9d', backgroundColor:'rgba(255,107,157,0.1)', fill:true, tension:0.35, pointRadius:5 },
+      { label:'Female Attrition %', data: YEARS.map(y=>n(MAP[company][y]?.['Attrition_Rate_Female_%'])), borderColor:'#ffa94d', borderDash:[4,3], tension:0.35, pointRadius:5 }
+    ]
+  }, { scales:{y:{min:0, ticks:{callback:v=>v+'%'}}} });
+
+  makeChart('chart-headcount','bar',{
+    labels: YEARS,
+    datasets: [
+      { label:'Employees', data: YEARS.map(y=>n(MAP[company][y]?.Employee_total)), backgroundColor:'rgba(108,99,255,0.6)', borderRadius:4 },
+      { label:'Workers', data: YEARS.map(y=>n(MAP[company][y]?.Workers_total)), backgroundColor:'rgba(0,212,170,0.5)', borderRadius:4 }
+    ]
+  });
+
+  makeChart('chart-kmp','bar',{
+    labels: YEARS,
+    datasets: [{
+      label:'KMP Women %', data: YEARS.map(y=>n(MAP[company][y]?.['KMP_women_%'])),
+      backgroundColor:'rgba(255,169,77,0.6)', borderRadius:6
+    }]
+  }, { scales:{y:{min:0,max:100, ticks:{callback:v=>v+'%'}}} });
+
+  makeChart('chart-bod-salary','bar',{
+    labels: YEARS,
+    datasets: [
+      { label:'Male BoD Median (₹L)', data: YEARS.map(y=>n(MAP[company][y]?.Median_Salary_Male_BoD_INRLakhs)), backgroundColor:'rgba(108,99,255,0.6)', borderRadius:4 },
+      { label:'Female BoD Median (₹L)', data: YEARS.map(y=>n(MAP[company][y]?.Median_Salary_Female_BoD_INRLakhs)), backgroundColor:'rgba(255,107,157,0.6)', borderRadius:4 }
+    ]
+  });
+
+  // --- Table ---
+  const tbody = document.getElementById('ov-table-body');
+  tbody.innerHTML = '';
+  YEARS.forEach(y => {
+    const r = MAP[company][y] || {};
+    const pg = n(r.Pay_Gap_Employees);
+    const pgW = n(r.Pay_Gap_Workers);
+    const pgClass = v => v===null?'':'pill '+(v>=0.95&&v<=1.05?'green':v<0.95?'red':'yellow');
+    const attrF = n(r['Attrition_Rate_Female_%']); const attrT = n(r['Attrition_Rate_Total_%']);
+    const attrClass = v => v===null?'':'pill '+(v>30?'red':v>15?'yellow':'green');
+    tbody.innerHTML += `
+      <tr>
+        <td><span class="pill blue">${y}</span></td>
+        <td>${r.Employee_total?Number(r.Employee_total).toLocaleString('en-IN'):'—'}</td>
+        <td>${r['Female_employee_%']?r['Female_employee_%']+'%':'—'}</td>
+        <td>${r.Workers_total!==undefined&&r.Workers_total!==''?Number(r.Workers_total).toLocaleString('en-IN'):'—'}</td>
+        <td>${r['Female_workers_%']?r['Female_workers_%']+'%':'—'}</td>
+        <td>${r['Board_women_%']?r['Board_women_%']+'%':'—'}</td>
+        <td>${r['KMP_women_%']!==undefined&&r['KMP_women_%']!==''?r['KMP_women_%']+'%':'—'}</td>
+        <td>${pg!==null?`<span class="${pgClass(pg)}">${pg.toFixed(3)}</span>`:'—'}</td>
+        <td>${pgW!==null?`<span class="${pgClass(pgW)}">${pgW.toFixed(3)}</span>`:'—'}</td>
+        <td>${attrT!==null?`<span class="${attrClass(attrT)}">${attrT.toFixed(1)}%</span>`:'—'}</td>
+        <td>${attrF!==null?`<span class="${attrClass(attrF)}">${attrF.toFixed(1)}%</span>`:'—'}</td>
+      </tr>`;
+  });
+}
+
+// ============================================================
+// COMPARE TAB
+// ============================================================
+// Populate sector dropdown
+updateSectorDropdown(); 
+
+let compareChartInst = null;
+function renderCompare() {
+  const year = document.getElementById('cmp-year').value;
+  const metric = document.getElementById('cmp-metric').value;
+  const sectorF = document.getElementById('cmp-sector').value;
+  // topN removed
+  const metricLabels = {
+    'Female_employee_%':'Female Employee %','Board_women_%':'Board Women %','KMP_women_%':'KMP Women %',
+    'Pay_Gap_Employees':'Employee Pay Gap','Pay_Gap_Workers':'Worker Pay Gap',
+    'Attrition_Rate_Total_%':'Attrition Total %','Attrition_Rate_Female_%':'Attrition Female %',
+    'Female_workers_%':'Female Workers %'
+  };
+
+  let rows = COMPANIES.map(c => {
+    // Attempt to get year-specific row
+    const r = MAP[c][year] || {};
+    // Find sector - prefer finding one that exists
+    const sectorRow = DATA.find(d => d.Company === c && d.Sector && d.Sector.trim() !== '');
+    const sector = sectorRow ? sectorRow.Sector : '';
+    
+    // Check metric value
+    const val = r[metric] !== undefined ? n(r[metric]) : null;
+    return { company:c, sector:sector, value: val };
+  }).filter(r => r.value !== null && (sectorF==='ALL' || r.sector===sectorF));
+
+  rows.sort((a,b)=>b.value-a.value);
+  // Max items logic removed
+  
+  const labels = rows.map(r => r.company.length>22?r.company.slice(0,22)+'…':r.company);
+  const values = rows.map(r => r.value);
+  const isRatio = metric.startsWith('Pay_Gap');
+
+  document.getElementById('cmp-chart-title').textContent = `${metricLabels[metric]} — ${year}${sectorF!=='ALL'?' ('+sectorF+')':''}`;
+
+  if (compareChartInst) { compareChartInst.destroy(); compareChartInst=null; }
+  const ctx = document.getElementById('chart-compare-bar').getContext('2d');
+  compareChartInst = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label: metricLabels[metric],
+        data: values,
+        backgroundColor: values.map(v => {
+          if (isRatio) return v>=0.95&&v<=1.05?'rgba(0,212,170,0.7)':v<0.95?'rgba(255,107,157,0.7)':'rgba(255,169,77,0.7)';
+          return 'rgba(108,99,255,0.75)';
+        }),
+        borderRadius:5
+      }]
+    },
+    options:{
+      ...JSON.parse(JSON.stringify(CHART_DEFAULTS)),
+      indexAxis:'y',
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ ticks:{color:'#8892b0',font:{size:10}}, grid:{color:'rgba(46,51,84,0.5)'}, beginAtZero:true },
+        y:{ ticks:{color:'#e8eaf6',font:{size:10}}, grid:{display:false} }
+      }
+    }
+  });
+
+  // Table
+  const tableWrap = document.getElementById('cmp-table-wrap');
+  let html = `<table><thead><tr><th>#</th><th>Company</th><th>Sector</th><th>${metricLabels[metric]}</th></tr></thead><tbody>`;
+  rows.forEach((r,i) => {
+    const cls = isRatio ? (r.value>=0.95&&r.value<=1.05?'green':r.value<0.95?'red':'yellow') : '';
+    html += `<tr><td style="color:var(--muted)">${i+1}</td><td>${r.company}</td><td><span class="sector-tag">${r.sector}</span></td><td><span class="${cls?'pill '+cls:''}">${r.value.toFixed(isRatio?3:2)}</span></td></tr>`;
+  });
+  html += '</tbody></table>';
+  tableWrap.innerHTML = html;
+}
+
+document.getElementById('cmp-render-btn').addEventListener('click', renderCompare);
+document.getElementById('hm-render-btn').addEventListener('click', renderHeatmap);
+
+// ============================================================
+// HEATMAP TAB
+// ============================================================
+const HM_COLORS = [
+  [15,17,23],   // bg
+  [108,99,255], // low-mid
+  [0,212,170],  // mid
+  [255,169,77], // high-mid
+  [255,107,157] // high
+];
+
+function colorScale(v, min, max) {
+  if (v===null) return '#22263a';
+  const t = max>min ? (v-min)/(max-min) : 0;
+  // Simple gradient: dark -> accent -> green -> orange -> red
+  const stops = [[15,17,23],[108,99,255],[0,212,170],[255,169,77],[255,107,157]];
+  const i = Math.min(3, Math.floor(t*4));
+  const f = t*4 - i;
+  const c0=stops[i], c1=stops[Math.min(4,i+1)];
+  const r=Math.round(c0[0]+(c1[0]-c0[0])*f);
+  const g=Math.round(c0[1]+(c1[1]-c0[1])*f);
+  const b=Math.round(c0[2]+(c1[2]-c0[2])*f);
+  return `rgb(${r},${g},${b})`;
+}
+
+let sectorBarInst = null;
+function renderHeatmap() {
+  const metric = document.getElementById('hm-metric').value;
+  const metricLabels = {
+    'Female_employee_%':'Female Employee %','Board_women_%':'Board Women %','KMP_women_%':'KMP Women %',
+    'Pay_Gap_Employees':'Employee Pay Gap','Attrition_Rate_Total_%':'Attrition Total %','Female_workers_%':'Female Workers %'
+  };
+  document.getElementById('sector-chart-title').textContent = `Sector Average: ${metricLabels[metric]}`;
+
+  const allVals = COMPANIES.flatMap(c => YEARS.map(y => n(MAP[c][y]?.[metric]))).filter(v=>v!==null);
+  const min = Math.min(...allVals), max = Math.max(...allVals);
+
+  // Build sorted by latest-year value
+  const sortedCo = [...COMPANIES].sort((a,b)=>{
+    const av = n(MAP[a]['2024-25']?.[metric]) ?? n(MAP[a]['2023-24']?.[metric]) ?? -999;
+    const bv = n(MAP[b]['2024-25']?.[metric]) ?? n(MAP[b]['2023-24']?.[metric]) ?? -999;
+    return bv-av;
+  });
+
+  let html = `
+    <table style="border-collapse:collapse;font-size:0.72rem;min-width:600px;">
+      <thead><tr>
+        <th style="background:var(--bg);color:var(--muted);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);position:sticky;left:0;z-index:2;min-width:200px;">Company</th>
+        ${YEARS.map(y=>`<th style="background:var(--bg);color:var(--muted);padding:8px 20px;border-bottom:1px solid var(--border);text-align:center;">${y}</th>`).join('')}
+        <th style="background:var(--bg);color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);">Trend</th>
+      </tr></thead>
+      <tbody>`;
+
+  sortedCo.forEach(c => {
+    const vals = YEARS.map(y => n(MAP[c][y]?.[metric]));
+    const hasData = vals.some(v=>v!==null);
+    if (!hasData) return;
+    const trendVal = vals.filter(v=>v!==null);
+    const trendDir = trendVal.length>=2 ? (trendVal[trendVal.length-1]-trendVal[0]) : 0;
+    const trendIcon = trendDir>0.5?'▲':trendDir<-0.5?'▼':'→';
+    const trendColor = trendDir>0.5?'var(--good)':trendDir<-0.5?'var(--bad)':'var(--warn)';
+    html += `<tr>
+      <td style="background:var(--panel);padding:7px 12px;border-bottom:1px solid rgba(46,51,84,0.4);position:sticky;left:0;color:var(--text);white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;">${c}</td>
+      ${vals.map(v=>{
+        const bg = colorScale(v,min,max);
+        const textColor = v===null?'var(--muted)':bg==='#22263a'?'var(--muted)':'#fff';
+        return `<td style="background:${bg};color:${textColor};padding:7px 20px;text-align:center;border-bottom:1px solid rgba(0,0,0,0.2);">${v!==null?v.toFixed(1):'—'}</td>`;
+      }).join('')}
+      <td style="background:var(--panel);padding:7px 12px;border-bottom:1px solid rgba(46,51,84,0.4);text-align:center;font-size:1rem;color:${trendColor};">${trendIcon}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('heatmap-container').innerHTML = html;
+
+  // Sector bar chart
+  const sectorData = {};
+  SECTORS.forEach(s => {
+    const vals = DATA.filter(r=>r.Sector===s).map(r=>n(r[metric])).filter(v=>v!==null);
+    if (vals.length>0) sectorData[s] = vals.reduce((a,b)=>a+b,0)/vals.length;
+  });
+  const secLabels = Object.keys(sectorData).sort((a,b)=>sectorData[b]-sectorData[a]);
+  const secVals = secLabels.map(s=>sectorData[s]);
+
+  if (sectorBarInst) { sectorBarInst.destroy(); sectorBarInst=null; }
+  const ctx = document.getElementById('chart-sector-bars').getContext('2d');
+  sectorBarInst = new Chart(ctx,{
+    type:'bar',
+    data:{ labels:secLabels.map(s=>s.length>25?s.slice(0,25)+'…':s), datasets:[{
+      label:metricLabels[metric], data:secVals,
+      backgroundColor: secVals.map((_,i)=>`hsl(${240-i*18},65%,55%)`), borderRadius:6
+    }]},
+    options:{
+      ...JSON.parse(JSON.stringify(CHART_DEFAULTS)),
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ ticks:{color:'#8892b0',font:{size:10}}, grid:{color:'rgba(46,51,84,0.5)'}, beginAtZero:true },
+        y:{ ticks:{color:'#e8eaf6',font:{size:10}}, grid:{display:false} }
+      }
+    }
+  });
+}
+
+// ============================================================
+// INIT: auto-select first company
+// ============================================================
+const firstLi = listEl.querySelector('li');
+if (firstLi) { firstLi.classList.add('active'); activeListItem=firstLi; renderOverview(COMPANIES[0]); }
+
+// ============================================================
+// CSV UPLOAD — reinitialize dashboard with new data
+// ============================================================
+function reinitializeDashboard() {
+  COMPANIES = [...new Set(DATA.map(r => r.Company))].sort();
+  SECTORS   = [...new Set(DATA.map(r => r.Sector).filter(Boolean))].sort();
+  MAP = {};
+  COMPANIES.forEach(c => { MAP[c] = {}; });
+  DATA.forEach(r => { if (MAP[r.Company]) MAP[r.Company][r.Year] = r; });
+
+  document.getElementById('total-companies-badge').textContent = `${COMPANIES.length} companies`;
+
+  // Rebuild sidebar
+  document.getElementById('company-search').value = '';
+  buildList('');
+
+  // Rebuild sector filter in Compare tab
+  const secSel2 = document.getElementById('cmp-sector');
+  secSel2.innerHTML = '<option value="ALL">All Sectors</option>';
+  SECTORS.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; secSel2.appendChild(o); });
+
+  // Reset overview
+  activeListItem = null;
+  document.getElementById('overview-empty').style.display = 'block';
+  document.getElementById('overview-content').style.display = 'none';
+
+  // Auto-select first company
+  const firstLi2 = document.getElementById('company-list').querySelector('li');
+  if (firstLi2) {
+    firstLi2.classList.add('active');
+    activeListItem = firstLi2;
+    renderOverview(COMPANIES[0]);
+  }
+
+  // Show success indicator
+  const statusEl = document.getElementById('upload-status');
+  statusEl.style.display = 'inline';
+  setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+}
+
+document.getElementById('csv-upload-input').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    DATA = parseCSV(ev.target.result);
+    reinitializeDashboard();
+    this.value = ''; // reset so same file can be re-uploaded
+  };
+  reader.readAsText(file);
+});
+
+// --- Compare sector dropdown also for heatmap ---
+const hmMetricSel = document.getElementById('hm-metric');
+
+</script>
 </body>
 </html>
